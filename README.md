@@ -45,9 +45,14 @@ with provenance + confidence + last-verified date), a recommendation engine
 that ranks them against YOUR interests/tiers/goals with reasons, an
 application tracker wired into alerts and the daily Top-5, a web-monitoring
 loop (18 watched recruitment/program pages, `npm run monitor` for cron), and a
-Brightspace iCal-feed adapter. Run `npm run seed:clubs` to load the researched
-set. Phases 3–5 (Career, Research, Startup OS) have their data model and
-architecture in place — see `docs/PHASES.md` and `docs/ARCHITECTURE.md`.
+Brightspace iCal-feed adapter. Run `npm run seed:clubs` to load the researched set.
+
+**Phases 3–6 are live too**: Career OS (application/interview tracker + skill
+matrix), Research OS (20 real researched Vanderbilt labs with per-lab fit
+analysis and follow-up nudges — `npm run seed:labs`), Startup OS (Wond'ry
+programs with real deadlines, milestones, mentors), and the cross-system
+command core: every life system feeds ONE alert/priority/workload pipeline
+and the AI chat reasons across all of it. See `docs/PHASES.md`.
 
 ## Quickstart
 

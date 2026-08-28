@@ -57,31 +57,42 @@ additive, never rewrites.
 - [ ] Meeting-time cross-source verification (conflict rows exist; automated
       social-page comparison lands with richer monitoring)
 
-## Phase 3 — Career OS (schema ready)
+## Phase 3 — Career OS ✅
 
-Tables in place: `CareerItem`, `Skill`.
-- [ ] Finance / consulting / tech tracks; recruiting timeline awareness
-- [ ] Skill matrix (current → target, next action, resource, time, deadline)
-- [ ] Career events + applications in the unified calendar & alerts
+- [x] Application/interview/networking tracker with finance/consulting/tech
+      tracks and first-year recruiting-timeline guidance
+- [x] Skill matrix (current → target with inline level editing, next action,
+      resource, time, deadline; 13 starter skills seeded from the spec)
+- [x] Career deadlines flow into alerts, the workload forecast, and the Top-5
 
-## Phase 4 — Research OS (schema ready)
+## Phase 4 — Research OS ✅
 
-Tables in place: `ResearchLab`, `ResearchOutreach`.
-- [ ] Lab database with fit analysis (why this lab / why I'm a fit / learn
-      first / could offer / how to approach)
-- [ ] Outreach tracker (RESEARCHING → … → ACCEPTED) with follow-up nudges
+- [x] Lab database seeded with 20 real Vanderbilt labs/groups researched from
+      official sources — prioritized by REALISTIC undergraduate access
+      (DSI-SRP funding, SoE paid summer research, documented undergrad
+      members), each with provenance + confidence + last-verified date
+- [x] Full fit analysis per lab: why this lab / why I'm a fit / what to learn
+      first / what I could offer / how to approach / next action
+- [x] Outreach log with follow-up nudges through the alert engine; status
+      pipeline RESEARCHING → … → ACCEPTED
 
-## Phase 5 — Startup OS (schema ready)
+## Phase 5 — Startup OS ✅
 
-Tables in place: `StartupItem`.
-- [ ] Startup dashboard: milestones, funding, competitions, programs, mentors,
-      investor/customer outreach
-- [ ] Wond'ry resource tracker (IMPACT, Ideator, mentorship, makerspace) with
-      deadline verification against current official sources
+- [x] Startup dashboard: milestones & tasks, mentors & investor/customer
+      outreach, startup goals with milestone progress
+- [x] Wond'ry resource tracker: 8 researched programs (IMPACT, Sullivan
+      Family Ideator, Builder, Founder, Mentors-in-Residence, makerspaces,
+      Sohr Grants, SEC Pitch) with provenance and the researched Sept 1, 2026
+      IMPACT deadline live in the calendar/alerts — flagged for verification
+      against the official source, per the source-verification policy
 
-## Phase 6 — AI Command Center
+## Phase 6 — AI Command Center ✅ (core)
 
-- [ ] Cross-system reasoning in chat ("bio exam Friday + consulting app
-      Wednesday + Wond'ry deadline Monday — here's your next 8 hours")
-      — the context pack already aggregates all systems; this phase widens it
-      to Phases 2–5 data and adds proactive daily briefs.
+- [x] One cross-system pipeline: club applications, career deadlines, startup
+      due-items, and research follow-ups all flow through the SAME alert
+      tiers, Top-5 ranking, and workload forecast as academics
+- [x] The chat context pack carries every system (courses, plans, clubs,
+      applications, career items, skills, labs, startup resources); Claude and
+      the heuristic router both answer cross-system questions from live data
+- [ ] Proactive scheduled daily briefs (the Today page serves this on open;
+      push-style delivery is deployment-specific)
