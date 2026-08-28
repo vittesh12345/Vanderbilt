@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { parseDateInput } from "@/lib/dates";
 import { toJson } from "@/lib/json";
 import type { GoalMilestone } from "@/lib/types";
 
@@ -66,7 +67,7 @@ export async function PATCH(
   if (body.targetDate === null) {
     data.targetDate = null;
   } else if (typeof body.targetDate === "string" && body.targetDate) {
-    const d = new Date(body.targetDate);
+    const d = parseDateInput(body.targetDate, "23:59") ?? new Date(NaN);
     if (isNaN(d.getTime())) {
       return NextResponse.json({ error: "Invalid targetDate" }, { status: 400 });
     }

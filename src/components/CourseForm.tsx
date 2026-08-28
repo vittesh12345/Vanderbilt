@@ -7,7 +7,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { DAY_NAMES } from "@/lib/dates";
+import { DAY_NAMES, parseHM } from "@/lib/dates";
 import type { CourseLink, GradeWeight, OfficeHour } from "@/lib/types";
 
 const MEETING_KINDS = ["LECTURE", "LAB", "DISCUSSION", "SEMINAR"] as const;
@@ -53,12 +53,14 @@ interface OfficeHourRow {
   start: string;
   end: string;
   location: string;
+  note: string; // not edited here, but round-tripped so edits don't erase it
 }
 interface LinkRow {
   label: string;
   url: string;
   kind: string;
   authRequired: boolean;
+  notes: string; // round-tripped, not edited here
 }
 
 const inputCls =
@@ -120,6 +122,7 @@ export default function CourseForm({
       start: o.start,
       end: o.end,
       location: o.location ?? "",
+      note: o.note ?? "",
     })),
   );
   const [links, setLinks] = useState<LinkRow[]>(
@@ -128,6 +131,7 @@ export default function CourseForm({
       url: l.url,
       kind: l.kind,
       authRequired: Boolean(l.authRequired),
+      notes: l.notes ?? "",
     })),
   );
 
@@ -175,6 +179,7 @@ export default function CourseForm({
           start: o.start.trim(),
           end: o.end.trim(),
           location: o.location.trim() || undefined,
+          note: o.note.trim() || undefined,
         })),
       links: links
         .filter((l) => l.url.trim())
@@ -183,6 +188,7 @@ export default function CourseForm({
           url: l.url.trim(),
           kind: l.kind,
           authRequired: l.authRequired,
+          notes: l.notes.trim() || undefined,
         })),
     };
   }
@@ -193,6 +199,13 @@ export default function CourseForm({
     if (!code.trim() || !title.trim()) {
       setError("Course code and title are required.");
       return;
+    }
+    for (const m of meetings) {
+      if (!m.startTime.trim() && !m.endTime.trim()) continue; // blank row, dropped
+      if (parseHM(m.startTime) == null || parseHM(m.endTime) == null) {
+        setError('Meeting times must be 24-hour HH:MM (e.g. "10:10"\u2013"11:00").');
+        return;
+      }
     }
     setBusy(true);
     try {
@@ -478,7 +491,7 @@ export default function CourseForm({
         type="button"
         className={addBtnCls}
         onClick={() =>
-          setOfficeHours((rows) => [...rows, { day: "Tue", start: "", end: "", location: "" }])
+          setOfficeHours((rows) => [...rows, { day: "Tue", start: "", end: "", location: "", note: "" }])
         }
       >
         + Add office hours
@@ -532,7 +545,7 @@ export default function CourseForm({
         type="button"
         className={addBtnCls}
         onClick={() =>
-          setLinks((rows) => [...rows, { label: "", url: "", kind: "LMS", authRequired: false }])
+          setLinks((rows) => [...rows, { label: "", url: "", kind: "LMS", authRequired: false, notes: "" }])
         }
       >
         + Add link

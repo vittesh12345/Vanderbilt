@@ -41,15 +41,28 @@ interface MeetingInput {
   location?: string | null;
 }
 
-function sanitizeMeetings(raw: unknown): MeetingInput[] {
-  if (!Array.isArray(raw)) return [];
+function sanitizeMeetings(raw: unknown): {
+  meetings: MeetingInput[];
+  invalid: string[];
+} {
+  if (!Array.isArray(raw)) return { meetings: [], invalid: [] };
   const out: MeetingInput[] = [];
+  const invalid: string[] = [];
   for (const m of raw) {
     if (!m || typeof m !== "object") continue;
     const { dayOfWeek, startTime, endTime, kind, location } = m as Record<string, unknown>;
-    if (typeof dayOfWeek !== "number" || dayOfWeek < 0 || dayOfWeek > 6) continue;
-    if (typeof startTime !== "string" || parseHM(startTime) == null) continue;
-    if (typeof endTime !== "string" || parseHM(endTime) == null) continue;
+    if (typeof dayOfWeek !== "number" || dayOfWeek < 0 || dayOfWeek > 6) {
+      invalid.push("day of week must be 0\u20136");
+      continue;
+    }
+    if (typeof startTime !== "string" || parseHM(startTime) == null) {
+      invalid.push(`start time "${String(startTime)}" must be 24h HH:MM (e.g. 10:10)`);
+      continue;
+    }
+    if (typeof endTime !== "string" || parseHM(endTime) == null) {
+      invalid.push(`end time "${String(endTime)}" must be 24h HH:MM (e.g. 11:00)`);
+      continue;
+    }
     out.push({
       dayOfWeek: Math.round(dayOfWeek),
       startTime: startTime.trim(),
@@ -60,7 +73,7 @@ function sanitizeMeetings(raw: unknown): MeetingInput[] {
         typeof location === "string" && location.trim() ? location.trim() : null,
     });
   }
-  return out;
+  return { meetings: out, invalid };
 }
 
 function optionalString(v: unknown): string | null {
@@ -85,7 +98,13 @@ export async function POST(req: NextRequest) {
     select: { color: true },
   });
   const color = nextCourseColor(existing.map((c) => c.color));
-  const meetings = sanitizeMeetings(body.meetings);
+  const { meetings, invalid } = sanitizeMeetings(body.meetings);
+  if (invalid.length) {
+    return NextResponse.json(
+      { error: `Invalid meeting: ${invalid[0]}` },
+      { status: 400 },
+    );
+  }
 
   const credits = Number(body.credits);
   const difficulty = Number(body.difficulty);

@@ -84,6 +84,25 @@ export function dueLabel(dueAt: Date, now: Date = new Date()): string {
   if (days < 0) return `${-days}d overdue`;
   if (days === 0) return "due today";
   if (days === 1) return "due tomorrow";
-  if (days <= 7) return `due ${format(dueAt, "EEEE")}`;
+  // A full week out would render as today's weekday name — use the date.
+  if (days < 7) return `due ${format(dueAt, "EEEE")}`;
   return `due ${format(dueAt, "MMM d")}`;
+}
+
+/**
+ * Parse a date value from client input. A bare YYYY-MM-DD (from
+ * <input type="date">) is interpreted in LOCAL time at `fallbackTime` —
+ * `new Date("2026-09-05")` alone would mean UTC midnight, which lands on the
+ * previous local day anywhere west of UTC. Full ISO datetimes pass through.
+ * Returns null for missing/invalid input.
+ */
+export function parseDateInput(
+  value: unknown,
+  fallbackTime = "23:59",
+): Date | null {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? new Date(`${value}T${fallbackTime}:00`)
+    : new Date(value);
+  return isNaN(d.getTime()) ? null : d;
 }

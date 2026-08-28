@@ -80,9 +80,11 @@ export async function getOpenAssignments(horizonDays?: number) {
 export async function getUpcomingExams(horizonDays = 60) {
   const now = new Date();
   const semester = await getCurrentSemester();
+  // Floor is `now`, not start-of-day: an exam taken this morning shouldn't
+  // keep ranking as a study action or "unplanned exam" all afternoon.
   return db.exam.findMany({
     where: {
-      startAt: { gte: startOfDay(now), lte: addDays(now, horizonDays) },
+      startAt: { gte: now, lte: addDays(now, horizonDays) },
       ...(semester ? { course: { semesterId: semester.id } } : {}),
     },
     include: { course: true },
@@ -153,7 +155,7 @@ export function buildCandidates(
 
   for (const e of exams) {
     const days = daysUntil(e.startAt, now);
-    if (days < 0 || days > 10) continue;
+    if (e.startAt.getTime() < now.getTime() || days > 10) continue;
     candidates.push({
       id: e.id,
       entityType: "EXAM_STUDY",
@@ -208,7 +210,8 @@ export async function getWorkloadInputs(
   now = new Date(),
   horizonDays = 28,
 ): Promise<WorkloadInputs> {
-  const [courses, assignments, exams, sessions, events] = await Promise.all([
+  const [semester, courses, assignments, exams, sessions, events] = await Promise.all([
+    getCurrentSemester(),
     getCourses(),
     getOpenAssignments(horizonDays),
     getUpcomingExams(horizonDays),
@@ -216,17 +219,23 @@ export async function getWorkloadInputs(
     getEventsInRange(startOfDay(now), addDays(now, horizonDays)),
   ]);
 
-  const classMeetings = courses.flatMap((c) =>
-    c.meetings.map((m) => {
-      const start = parseHM(m.startTime) ?? 0;
-      const end = parseHM(m.endTime) ?? start + 60;
-      return {
-        dayOfWeek: m.dayOfWeek,
-        minutes: Math.max(30, end - start),
-        label: c.code,
-      };
-    }),
-  );
+  // Outside the semester (break, summer) weekly meetings don't happen — an
+  // empty meeting list keeps the forecast honest.
+  const inSemester =
+    !semester || (now >= semester.startDate && now <= endOfDay(semester.endDate));
+  const classMeetings = inSemester
+    ? courses.flatMap((c) =>
+        c.meetings.map((m) => {
+          const start = parseHM(m.startTime) ?? 0;
+          const end = parseHM(m.endTime) ?? start + 60;
+          return {
+            dayOfWeek: m.dayOfWeek,
+            minutes: Math.max(30, end - start),
+            label: c.code,
+          };
+        }),
+      )
+    : [];
 
   return {
     now,
@@ -269,10 +278,15 @@ export async function getAlerts(now = new Date()): Promise<AlertItem[]> {
       getUpcomingExams(14),
       getOpenTasks(),
       db.conflict.findMany({ where: { status: "OPEN" } }),
-      db.topic.findMany({
-        where: { mastery: "NEEDS_REVIEW" },
-        include: { course: true },
-      }),
+      getCurrentSemester().then((semester) =>
+        db.topic.findMany({
+          where: {
+            mastery: "NEEDS_REVIEW",
+            ...(semester ? { course: { semesterId: semester.id } } : {}),
+          },
+          include: { course: true },
+        }),
+      ),
       getWorkloadInputs(now),
       db.dismissedAlert.findMany(),
       getProfile(),
@@ -335,7 +349,9 @@ export async function getAlerts(now = new Date()): Promise<AlertItem[]> {
 // ---------------------------------------------------------------------------
 
 export async function getClassPreps(now = new Date()): Promise<ClassPrep[]> {
+  const semester = await getCurrentSemester();
   const courses = await db.course.findMany({
+    where: semester ? { semesterId: semester.id } : undefined,
     include: {
       meetings: true,
       topics: true,
@@ -419,12 +435,18 @@ export async function getUnifiedCalendar(
 
   const out: UnifiedEvent[] = [];
 
-  // Expand weekly class meetings into concrete occurrences.
-  for (
-    let day = startOfDay(rangeStart);
-    day <= rangeEnd;
-    day = addDays(day, 1)
-  ) {
+  // Expand weekly class meetings into concrete occurrences — clamped to the
+  // semester, so breaks and summers don't show phantom classes.
+  const semester = await getCurrentSemester();
+  const expandStart =
+    semester && startOfDay(semester.startDate) > startOfDay(rangeStart)
+      ? startOfDay(semester.startDate)
+      : startOfDay(rangeStart);
+  const expandEnd =
+    semester && endOfDay(semester.endDate) < rangeEnd
+      ? endOfDay(semester.endDate)
+      : rangeEnd;
+  for (let day = expandStart; day <= expandEnd; day = addDays(day, 1)) {
     const dow = day.getDay();
     for (const c of courses) {
       for (const m of c.meetings) {

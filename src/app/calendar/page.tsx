@@ -21,6 +21,7 @@ import { getUnifiedCalendar, type UnifiedEvent } from "@/lib/data/queries";
 import { fmtMinutes, fmtTime } from "@/lib/dates";
 import { Card, CourseDot, EmptyState, PageHeader } from "@/components/ui";
 import { AddEventButton } from "@/components/EventForm";
+import EventActions from "@/components/EventActions";
 
 export const dynamic = "force-dynamic";
 
@@ -358,6 +359,9 @@ export default async function CalendarPage({
                               <span className="shrink-0 text-xs text-[var(--text-muted)]">
                                 {suffixParts.join(" · ")}
                               </span>
+                            ) : null}
+                            {ev.kind === "EVENT" ? (
+                              <EventActions eventId={ev.id} />
                             ) : null}
                           </li>
                         );

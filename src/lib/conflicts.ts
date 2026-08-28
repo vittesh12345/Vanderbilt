@@ -3,7 +3,7 @@
 // a Conflict row that surfaces in alerts and on the syllabus page until the
 // user resolves it.
 
-import { isSameDay } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { parseJson } from "@/lib/json";
 import type { GradeWeight, SyllabusExtraction } from "@/lib/types";
 
@@ -72,7 +72,7 @@ export function detectConflicts(
           sourceA: sourceLabel,
           valueA: d.date.slice(0, 10),
           sourceB: exam.source === "MANUAL" ? "Existing record" : `Existing record (${exam.source})`,
-          valueB: exam.startAt.toISOString().slice(0, 10),
+          valueB: format(exam.startAt, "yyyy-MM-dd"),
           suggestion: "Verify with professor.",
         });
       }
@@ -95,7 +95,7 @@ export function detectConflicts(
           sourceA: sourceLabel,
           valueA: d.date.slice(0, 10),
           sourceB: a.source === "MANUAL" ? "Existing record" : `Existing record (${a.source})`,
-          valueB: a.dueAt.toISOString().slice(0, 10),
+          valueB: format(a.dueAt, "yyyy-MM-dd"),
           suggestion: "Verify with professor.",
         });
       }

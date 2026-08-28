@@ -118,7 +118,11 @@ export function buildStudyPlan(input: StudyPlanInput): StudyPlan {
   const rawAlloc = weights.map((w) => (remaining * w) / weightSum);
 
   // Cap per-day; redistribute overflow into earlier days if possible.
-  const alloc = rawAlloc.map((m) => Math.min(maxSession, roundTo15(m)));
+  // Plain rounding (no 15-min floor) lets tiny far-out days round to 0 and be
+  // skipped — a floor would inflate low-stakes plans to 2–3× the target.
+  const alloc = rawAlloc.map((m) =>
+    Math.min(maxSession, Math.round(m / 15) * 15),
+  );
   let overflow = remaining - alloc.reduce((a, b) => a + b, 0);
   for (let i = alloc.length - 1; i >= 0 && overflow >= 15; i--) {
     const room = maxSession - alloc[i];

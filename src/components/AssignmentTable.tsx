@@ -58,11 +58,11 @@ function matchesFilter(row: AssignmentRowData, filter: FilterKey, now: Date): bo
     case "OPEN":
       return OPEN_STATUSES.includes(row.status);
     case "OVERDUE":
+      // Overdue-ness is derived; OVERDUE is no longer a storable status.
       return (
-        row.status === "OVERDUE" ||
-        (OPEN_STATUSES.includes(row.status) &&
-          row.dueAt != null &&
-          new Date(row.dueAt) < now)
+        OPEN_STATUSES.includes(row.status) &&
+        row.dueAt != null &&
+        new Date(row.dueAt) < now
       );
     default:
       return row.status === filter;
@@ -183,7 +183,12 @@ function AssignmentRow({ row, now }: { row: AssignmentRowData; now: Date }) {
   }
 
   function onStatusChange(next: string) {
-    if (next === row.status) return;
+    if (next === row.status) {
+      // Re-selecting the true status cancels a pending done-status.
+      setPendingStatus(null);
+      setActualMinutes("");
+      return;
+    }
     if (DONE_STATUSES.includes(next)) {
       setPendingStatus(next); // collect actual minutes first
     } else {

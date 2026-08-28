@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { parseDateInput } from "@/lib/dates";
 import { EVENT_CATEGORIES } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
@@ -15,10 +16,12 @@ export async function POST(req: NextRequest) {
 
   const category = EVENT_CATEGORIES.includes(body.category) ? body.category : "PERSONAL";
 
+  // Bare YYYY-MM-DD from <input type="date"> is local end-of-day, not UTC
+  // midnight (which would land on the previous local day).
   let dueAt: Date | null = null;
   if (typeof body.dueAt === "string" && body.dueAt) {
-    dueAt = new Date(body.dueAt);
-    if (isNaN(dueAt.getTime())) {
+    dueAt = parseDateInput(body.dueAt, "23:59");
+    if (!dueAt) {
       return NextResponse.json({ error: "Invalid dueAt" }, { status: 400 });
     }
   }

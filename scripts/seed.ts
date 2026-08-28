@@ -222,12 +222,12 @@ async function main() {
     courseId: cs.id, title: "Read: Zybooks Ch. 5 (Loops)", kind: "READING",
     dueAt: day(1, 10, 10), source: "SYLLABUS", estMinutes: 45, importance: 3, difficulty: 2,
   });
-  await mk({
+  const csPs2 = await mk({
     courseId: cs.id, title: "Problem Set 2 — Control Flow", kind: "PROBLEM_SET",
     dueAt: day(2, 23, 59), source: "BRIGHTSPACE", estMinutes: 120, estMinutesMax: 180,
     importance: 4, difficulty: 3, gradeWeight: 4, status: "IN_PROGRESS",
   });
-  const csProject = await mk({
+  await mk({
     courseId: cs.id, title: "Project 1 Milestone — Game of Life design doc", kind: "PROJECT",
     dueAt: day(12, 23, 59), source: "BRIGHTSPACE", estMinutes: 300, estMinutesMax: 420,
     importance: 5, difficulty: 4, gradeWeight: 10, recommendedStartAt: day(5),
@@ -361,7 +361,7 @@ async function main() {
       date: day(0), minutes: 60, kind: "ASSIGNMENT_WORK",
       focus: "Work on CS 1101 Problem Set 2 — finish loop exercises",
       rationale: "Due in 2 days; already in progress.",
-      assignmentId: csProject.id, courseId: cs.id,
+      assignmentId: csPs2.id, courseId: cs.id,
     },
   });
 

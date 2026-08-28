@@ -63,12 +63,19 @@ export default async function UpcomingPage() {
   const appish = (e: { title: string; description: string | null }) =>
     APPISH.test(e.title + (e.description ?? ""));
 
+  // Single definition of "major" shared by the stat row and the week-by-week
+  // list, over the same [floor, windowEnd] span, so the numbers agree.
+  const isMajor = (a: {
+    gradeWeight: number | null;
+    kind: string;
+    estMinutes: number | null;
+  }) =>
+    (a.gradeWeight ?? 0) >= 10 ||
+    a.kind === "PROJECT" ||
+    a.kind === "ESSAY" ||
+    (a.estMinutes ?? 0) >= 180;
   const majorAssignments = assignments.filter(
-    (a) =>
-      a.dueAt &&
-      a.dueAt >= floor &&
-      a.dueAt <= windowEnd &&
-      ((a.gradeWeight ?? 0) >= 10 || a.kind === "PROJECT" || a.kind === "ESSAY"),
+    (a) => a.dueAt && a.dueAt >= floor && a.dueAt <= windowEnd && isMajor(a),
   );
   const appEvents = events.filter(appish);
 
@@ -174,8 +181,9 @@ export default async function UpcomingPage() {
               (a) =>
                 a.dueAt &&
                 a.dueAt >= floor &&
+                a.dueAt <= windowEnd &&
                 inWeek(a.dueAt, w.start) &&
-                ((a.gradeWeight ?? 0) >= 10 || (a.estMinutes ?? 0) >= 180),
+                isMajor(a),
             );
             const wOrgEvents = events.filter(
               (e) =>

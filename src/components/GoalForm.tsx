@@ -43,7 +43,7 @@ export default function GoalForm() {
           title: title.trim(),
           description: description.trim() || undefined,
           tier: Number(tier),
-          targetDate: targetDate || undefined,
+          targetDate: targetDate ? new Date(`${targetDate}T23:59`).toISOString() : undefined,
           milestones: milestones
             .split("\n")
             .map((line) => line.trim())

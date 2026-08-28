@@ -22,6 +22,41 @@ const MONTH_DATE_RE =
   /\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s*(\d{4}))?/gi;
 const NUMERIC_DATE_RE = /\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/g;
 const TIME_RE = /\b(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)\b/i;
+const RANGE_TIME_RE =
+  /\b(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?\s*[–—-]\s*(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)\b/i;
+
+function to24h(hour: number, minutes: string | undefined, pm: boolean): string {
+  let h = hour % 12;
+  if (pm) h += 12;
+  return `${String(h).padStart(2, "0")}:${minutes ?? "00"}`;
+}
+
+/**
+ * Time-of-day from a line. A range like "7:00–9:00 pm" yields the START
+ * (7 PM), inheriting the trailing meridiem when the start lacks its own;
+ * "11:00–1:00 pm" style wraps resolve the start to AM.
+ */
+function extractTime(line: string): string | undefined {
+  const range = RANGE_TIME_RE.exec(line);
+  if (range) {
+    const startPm = range[3]
+      ? /p/i.test(range[3])
+      : range[6]
+        ? /p/i.test(range[6])
+        : false;
+    const endPm = range[6] ? /p/i.test(range[6]) : startPm;
+    let start = to24h(Number(range[1]), range[2], startPm);
+    const end = to24h(Number(range[4]), range[5], endPm);
+    // "11:00–1:00 pm": inherited PM start would land after the end — it's AM.
+    if (start > end && !range[3]) {
+      start = to24h(Number(range[1]), range[2], !startPm);
+    }
+    return start;
+  }
+  const single = TIME_RE.exec(line);
+  if (single) return to24h(Number(single[1]), single[2], /p/i.test(single[3]));
+  return undefined;
+}
 const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.]+/;
 const COURSE_CODE_RE = /\b([A-Z]{2,4})\s?-?\s?(\d{3,4}[A-Za-z]?)\b/;
 const PERCENT_AFTER_RE = /([A-Za-z][A-Za-z0-9 /&()'-]{2,40}?)\s*[:–—-]\s*(\d{1,3})\s*%/g;
@@ -52,6 +87,10 @@ function findDates(line: string): FoundDate[] {
     out.push({ month, day, year: m[3] ? Number(m[3]) : null, index: m.index ?? 0 });
   }
   for (const m of line.matchAll(NUMERIC_DATE_RE)) {
+    // "sections 3/4", "ch. 5/6", "pp. 10/12" are fractions, not dates.
+    const before = line.slice(Math.max(0, (m.index ?? 0) - 12), m.index ?? 0);
+    if (/\b(?:section|sec|ch(?:apter)?s?|pp?|pages?|problems?|exercises?|parts?|weeks?)\.?\s*$/i.test(before))
+      continue;
     const month = Number(m[1]) - 1;
     const day = Number(m[2]);
     if (month < 0 || month > 11 || day < 1 || day > 31) continue;
@@ -279,14 +318,21 @@ export function parseSyllabus(
           if (!warnings.includes("Some dates had no explicit year; assumed " + year + "."))
             warnings.push("Some dates had no explicit year; assumed " + year + ".");
         }
-        const iso = `${year}-${String(d.month + 1).padStart(2, "0")}-${String(d.day).padStart(2, "0")}`;
-        const time = TIME_RE.exec(trimmed);
-        let hm: string | undefined;
-        if (time) {
-          let h = Number(time[1]) % 12;
-          if (/p/i.test(time[3])) h += 12;
-          hm = `${String(h).padStart(2, "0")}:${time[2] ?? "00"}`;
+        // Reject impossible calendar dates ("February 30") instead of letting
+        // Date roll them into the next month at commit time.
+        const check = new Date(year, d.month, d.day);
+        if (
+          check.getFullYear() !== year ||
+          check.getMonth() !== d.month ||
+          check.getDate() !== d.day
+        ) {
+          warnings.push(
+            `Skipped impossible date on line: "${trimmed.slice(0, 100)}"`,
+          );
+          continue;
         }
+        const iso = `${year}-${String(d.month + 1).padStart(2, "0")}-${String(d.day).padStart(2, "0")}`;
+        const hm = extractTime(trimmed);
         extraction.dates.push({
           title: titleFromLine(trimmed),
           kind: cls.kind,

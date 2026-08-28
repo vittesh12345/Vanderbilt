@@ -170,6 +170,21 @@ export async function POST(req: NextRequest) {
   let createdAssignments = 0;
   let createdExams = 0;
 
+  // A grade-weight category covers ALL items it matches ("Quizzes: 30%" over
+  // Quiz 1..5) — divide the category weight across this batch's matches so a
+  // single quiz never claims the whole 30%.
+  const categoryMatchCount = new Map<string, number>();
+  for (const d of dates) {
+    if (d.kind !== "EXAM" && d.kind !== "QUIZ") continue;
+    const w = weightPool.find((x) => categoryMatchesTitle(x.category, d.title));
+    if (w) {
+      categoryMatchCount.set(
+        w.category,
+        (categoryMatchCount.get(w.category) ?? 0) + 1,
+      );
+    }
+  }
+
   for (const d of dates) {
     const isExam = d.kind === "EXAM" || d.kind === "QUIZ";
     const at = new Date(`${d.date}T${d.time ?? (isExam ? "09:00" : "23:59")}:00`);
@@ -182,9 +197,16 @@ export async function POST(req: NextRequest) {
     if (isExam) {
       const kind =
         d.kind === "QUIZ" ? "QUIZ" : /final/i.test(d.title) ? "FINAL" : "MIDTERM";
-      const weight =
-        weightPool.find((w) => categoryMatchesTitle(w.category, d.title))
-          ?.weight ?? null;
+      const matched = weightPool.find((w) =>
+        categoryMatchesTitle(w.category, d.title),
+      );
+      const weight = matched
+        ? Math.round(
+            (matched.weight /
+              Math.max(1, categoryMatchCount.get(matched.category) ?? 1)) *
+              10,
+          ) / 10
+        : null;
       await db.exam.create({
         data: {
           courseId: course.id,

@@ -33,7 +33,7 @@ export default function TaskQuickAdd() {
         body: JSON.stringify({
           title: title.trim(),
           category,
-          dueAt: due || undefined,
+          dueAt: due ? new Date(`${due}T23:59`).toISOString() : undefined,
           estMinutes: est ? Number(est) : undefined,
           importance: Number(importance),
         }),

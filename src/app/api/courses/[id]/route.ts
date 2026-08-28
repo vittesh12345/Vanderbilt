@@ -17,14 +17,27 @@ interface MeetingInput {
   location?: string | null;
 }
 
-function sanitizeMeetings(raw: unknown[]): MeetingInput[] {
+function sanitizeMeetings(raw: unknown[]): {
+  meetings: MeetingInput[];
+  invalid: string[];
+} {
   const out: MeetingInput[] = [];
+  const invalid: string[] = [];
   for (const m of raw) {
     if (!m || typeof m !== "object") continue;
     const { dayOfWeek, startTime, endTime, kind, location } = m as Record<string, unknown>;
-    if (typeof dayOfWeek !== "number" || dayOfWeek < 0 || dayOfWeek > 6) continue;
-    if (typeof startTime !== "string" || parseHM(startTime) == null) continue;
-    if (typeof endTime !== "string" || parseHM(endTime) == null) continue;
+    if (typeof dayOfWeek !== "number" || dayOfWeek < 0 || dayOfWeek > 6) {
+      invalid.push("day of week must be 0\u20136");
+      continue;
+    }
+    if (typeof startTime !== "string" || parseHM(startTime) == null) {
+      invalid.push(`start time "${String(startTime)}" must be 24h HH:MM (e.g. 14:05)`);
+      continue;
+    }
+    if (typeof endTime !== "string" || parseHM(endTime) == null) {
+      invalid.push(`end time "${String(endTime)}" must be 24h HH:MM (e.g. 15:20)`);
+      continue;
+    }
     out.push({
       dayOfWeek: Math.round(dayOfWeek),
       startTime: startTime.trim(),
@@ -35,7 +48,7 @@ function sanitizeMeetings(raw: unknown[]): MeetingInput[] {
         typeof location === "string" && location.trim() ? location.trim() : null,
     });
   }
-  return out;
+  return { meetings: out, invalid };
 }
 
 /** "" → null, non-empty string → trimmed, anything else → undefined (skip). */
@@ -105,7 +118,15 @@ export async function PATCH(
     const course = await db.course.update({ where: { id }, data });
 
     if (Array.isArray(body.meetings)) {
-      const meetings = sanitizeMeetings(body.meetings);
+      // Reject malformed rows BEFORE deleting anything — a typo'd time must
+      // never silently wipe an existing meeting.
+      const { meetings, invalid } = sanitizeMeetings(body.meetings);
+      if (invalid.length) {
+        return NextResponse.json(
+          { error: `Invalid meeting: ${invalid[0]}` },
+          { status: 400 },
+        );
+      }
       await db.courseMeeting.deleteMany({ where: { courseId: id } });
       if (meetings.length) {
         await db.courseMeeting.createMany({

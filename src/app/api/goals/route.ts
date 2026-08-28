@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { parseDateInput } from "@/lib/dates";
 import { toJson } from "@/lib/json";
 import { EVENT_CATEGORIES, type GoalMilestone } from "@/lib/types";
 
@@ -42,10 +43,11 @@ export async function POST(req: NextRequest) {
       ? Math.min(3, Math.max(1, Math.round(body.tier)))
       : 2;
 
+  // Bare YYYY-MM-DD parses as local end-of-day, not UTC midnight.
   let targetDate: Date | null = null;
   if (typeof body.targetDate === "string" && body.targetDate) {
-    targetDate = new Date(body.targetDate);
-    if (isNaN(targetDate.getTime())) {
+    targetDate = parseDateInput(body.targetDate, "23:59");
+    if (!targetDate) {
       return NextResponse.json({ error: "Invalid targetDate" }, { status: 400 });
     }
   }

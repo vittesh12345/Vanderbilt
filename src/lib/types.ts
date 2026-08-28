@@ -2,13 +2,15 @@
 // plain strings (SQLite has no enums); this module is the single source of
 // truth for what those strings may be.
 
+// Overdue-ness is DERIVED (dueAt < now on an open assignment), never a stored
+// status — a stored OVERDUE would silently drop the row from every open-work
+// surface that filters on NOT_STARTED/IN_PROGRESS/BLOCKED.
 export const ASSIGNMENT_STATUSES = [
   "NOT_STARTED",
   "IN_PROGRESS",
   "BLOCKED",
   "SUBMITTED",
   "COMPLETED",
-  "OVERDUE",
 ] as const;
 export type AssignmentStatus = (typeof ASSIGNMENT_STATUSES)[number];
 

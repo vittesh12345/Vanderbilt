@@ -139,7 +139,7 @@ model Assignment {
   dueAt       DateTime?
   source      String    @default("MANUAL") // MANUAL | SYLLABUS | BRIGHTSPACE | EXTERNAL | AI
   sourceUrl   String?
-  status      String    @default("NOT_STARTED") // NOT_STARTED | IN_PROGRESS | BLOCKED | SUBMITTED | COMPLETED | OVERDUE
+  status      String    @default("NOT_STARTED") // NOT_STARTED | IN_PROGRESS | BLOCKED | SUBMITTED | COMPLETED (overdue is derived from dueAt, never stored)
   difficulty  Int       @default(3) // 1..5
   importance  Int       @default(3) // 1..5
   gradeWeight Float? // percent of the final grade this single item is worth

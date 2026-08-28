@@ -123,7 +123,7 @@ export function computeAlerts(inputs: AlertInputs): AlertItem[] {
       severity: "WARNING",
       title: `Heavy week detected: ${format(w.start, "MMM d")}–${format(w.end, "MMM d")}`,
       body:
-        `${w.assignments} assignments, ${w.quizzes} quizzes, ${w.exams} exam${w.exams === 1 ? "" : "s"}` +
+        `${w.assignments} assignment${w.assignments === 1 ? "" : "s"}, ${w.quizzes} quiz${w.quizzes === 1 ? "" : "zes"}, ${w.exams} exam${w.exams === 1 ? "" : "s"}` +
         (w.applications ? `, ${w.applications} application deadlines` : "") +
         (w.recommendations.length ? `. ${w.recommendations[0]}` : ""),
       href: "/upcoming",

@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { parseDateInput } from "@/lib/dates";
 import { EVENT_CATEGORIES, TASK_STATUSES } from "@/lib/types";
 
 export async function PATCH(
@@ -35,8 +36,8 @@ export async function PATCH(
   if (body.dueAt === null) {
     data.dueAt = null;
   } else if (typeof body.dueAt === "string" && body.dueAt) {
-    const d = new Date(body.dueAt);
-    if (isNaN(d.getTime())) {
+    const d = parseDateInput(body.dueAt, "23:59");
+    if (!d) {
       return NextResponse.json({ error: "Invalid dueAt" }, { status: 400 });
     }
     data.dueAt = d;

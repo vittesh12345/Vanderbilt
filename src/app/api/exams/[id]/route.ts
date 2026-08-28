@@ -87,7 +87,33 @@ export async function PATCH(
     data.notes = null;
   }
 
-  const exam = await db.exam.update({ where: { id }, data });
+  // A moved exam invalidates its study plan: drop the stale (uncompleted)
+  // sessions and clear planGeneratedAt so the UNPLANNED_EXAM alert prompts a
+  // regenerate — otherwise prep sessions dated after the new exam linger.
+  const dateChanged =
+    data.startAt !== undefined &&
+    data.startAt.getTime() !== existing.startAt.getTime();
+  if (dateChanged) {
+    await db.workSession.deleteMany({
+      where: { examId: id, kind: "EXAM_STUDY", completed: false },
+    });
+  }
+
+  const exam = await db.exam.update({
+    where: { id },
+    data: dateChanged
+      ? { ...data, planGeneratedAt: null, planRationale: null }
+      : data,
+  });
+
+  // Sessions carry a denormalized courseId — keep it in sync on reassignment.
+  if (data.courseId) {
+    await db.workSession.updateMany({
+      where: { examId: id },
+      data: { courseId: data.courseId },
+    });
+  }
+
   return NextResponse.json(exam);
 }
 
