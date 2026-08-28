@@ -31,7 +31,13 @@ interface ResearchLabRow {
 }
 
 async function main() {
-  const raw = readFileSync(join(__dirname, "data", "vanderbilt-labs.json"), "utf8");
+  let raw: string;
+  try {
+    raw = readFileSync(join(__dirname, "data", "vanderbilt-labs.json"), "utf8");
+  } catch {
+    console.log("No lab research data file yet (scripts/data/vanderbilt-labs.json) — skipping.");
+    return;
+  }
   const data = JSON.parse(raw) as { researchedAt: string; labs: ResearchLabRow[] };
   const verifiedAt = new Date(`${data.researchedAt}T12:00:00`);
 
