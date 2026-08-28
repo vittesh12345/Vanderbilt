@@ -26,7 +26,15 @@ export interface AlertInputs {
     startAt: Date;
     planGeneratedAt: Date | null;
   }[];
-  tasks: { id: string; title: string; category: string; dueAt: Date | null; status: string }[];
+  tasks: {
+    id: string;
+    title: string;
+    category: string;
+    dueAt: Date | null;
+    status: string;
+    /** Where in the app to act on it (defaults to /long-term). */
+    href?: string;
+  }[];
   openConflicts: { id: string; description: string; suggestion: string | null }[];
   heavyWeeks: HeavyWeek[];
   needsReviewTopics: { id: string; name: string; courseCode: string }[];
@@ -101,7 +109,7 @@ export function computeAlerts(inputs: AlertInputs): AlertItem[] {
       severity: tier.severity,
       title: t.title,
       body: `${tier.hint} (${t.category.toLowerCase()})`,
-      href: "/long-term",
+      href: t.href ?? "/long-term",
       at: t.dueAt,
     });
   }

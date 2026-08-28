@@ -70,8 +70,11 @@ export function heuristicAnswer(question: string, pack: ChatContextPack): string
   if (/deadline|due|next week|coming up/.test(q)) return deadlineAnswer(q, pack, now);
   if (/falling behind|behind|overdue|missed/.test(q)) return behindAnswer(pack, now);
   if (/2 hours|only have|tonight/.test(q)) return budgetAnswer(q, pack, now);
+  // A named life-system beats the generic top-actions branch, so "what should
+  // I do for my startup this week?" answers from startup data.
+  if (/club|research|startup|career|intern|recruit/.test(q))
+    return categoryAnswer(q, pack, now);
   if (/what should i do|top action|priorit/.test(q)) return actionsAnswer(pack, now);
-  if (/club|research|startup|career/.test(q)) return categoryAnswer(q, pack, now);
   return briefingAnswer(pack, now);
 }
 
@@ -392,6 +395,56 @@ function categoryAnswer(q: string, pack: ChatContextPack, now: Date): string {
     }
   }
 
+  if (cats.has("CAREER")) {
+    const items = pack.careerItems ?? [];
+    const apps = items.filter((c) => ["APPLICATION", "RECRUITER"].includes(c.kind));
+    if (apps.length) {
+      lines.push("Career applications:");
+      for (const c of apps.slice(0, 4)) {
+        const d = toDate(c.at);
+        lines.push(`- ${c.title}${c.company ? ` (${c.company})` : ""}${d ? ` — ${dueLabel(d, now)}` : ""}`);
+      }
+    }
+    const weakest = (pack.skills ?? [])
+      .filter((sk) => sk.currentLevel < sk.targetLevel)
+      .slice(0, 3);
+    if (weakest.length) {
+      lines.push(
+        `Skills to build next: ${weakest.map((sk) => `${sk.name} (${sk.currentLevel}→${sk.targetLevel})`).join(", ")}.`,
+      );
+    }
+  }
+
+  if (cats.has("RESEARCH")) {
+    const labs = (pack.researchLabs ?? []).filter((l) =>
+      ["RESEARCHING", "POTENTIAL_FIT", "CONTACTED", "FOLLOW_UP"].includes(l.status),
+    );
+    if (labs.length) {
+      lines.push("Research labs in your pipeline:");
+      for (const l of labs.slice(0, 4)) {
+        lines.push(
+          `- ${l.professor}${l.lab ? ` (${l.lab})` : ""} — ${l.status.replace(/_/g, " ").toLowerCase()}${l.nextAction ? `; next: ${l.nextAction}` : ""}`,
+        );
+      }
+    }
+  }
+
+  if (cats.has("STARTUP")) {
+    const su = (pack.startupItems ?? []).filter((i) =>
+      ["PROGRAM", "COMPETITION", "FUNDING"].includes(i.kind),
+    );
+    const dated = su.filter((i) => toDate(i.dueAt));
+    if (dated.length || su.length) {
+      lines.push("Vanderbilt startup resources tracked:");
+      for (const i of (dated.length ? dated : su).slice(0, 4)) {
+        const d = toDate(i.dueAt);
+        lines.push(
+          `- ${i.title}${d ? ` — ${dueLabel(d, now)}` : ""}${i.nextAction ? ` (${i.nextAction.slice(0, 80)})` : ""}`,
+        );
+      }
+    }
+  }
+
   if (tasks.length) {
     lines.push("Open tasks:");
     for (const t of tasks.slice(0, 5)) {
@@ -415,10 +468,11 @@ function categoryAnswer(q: string, pack: ChatContextPack, now: Date): string {
   if (!lines.length) {
     lines.push("Nothing tracked in that area yet — add tasks, events, or goals and they'll show up here.");
   }
-  lines.push(
-    "",
-    "Club intelligence is live on /clubs (rankings, applications, watched pages). Deeper career, research, and startup intelligence arrives in Phases 3–5.",
-  );
+  if (!lines.length) {
+    lines.push(
+      "Nothing tracked in that area yet — the /clubs, /career, /research, and /startup pages are where it accumulates.",
+    );
+  }
   return lines.join("\n");
 }
 

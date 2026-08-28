@@ -196,6 +196,84 @@ export function buildCandidates(
   return candidates;
 }
 
+/**
+ * Career, startup, and research work as tasks-shaped rows so ONE pipeline
+ * (alert tiers, Top-5 ranking, workload forecast) serves every system —
+ * the Phase 6 "AI command center" contract in data form.
+ */
+export async function getCrossSystemTasks(now = new Date()) {
+  const [careerItems, startupItems, outreach] = await Promise.all([
+    db.careerItem.findMany({
+      where: { status: { notIn: ["DONE", "DROPPED"] }, at: { not: null } },
+    }),
+    db.startupItem.findMany({
+      where: { status: { in: ["OPEN", "IN_PROGRESS", "WATCHING"] }, dueAt: { not: null } },
+    }),
+    db.researchOutreach.findMany({
+      where: {
+        followUpAt: { not: null },
+        lab: { status: { notIn: ["NOT_A_FIT", "ACCEPTED"] } },
+      },
+      include: { lab: true },
+    }),
+  ]);
+
+  const rows: {
+    id: string;
+    title: string;
+    category: string;
+    dueAt: Date | null;
+    status: string;
+    estMinutes: number;
+    importance: number;
+    href: string;
+  }[] = [];
+
+  for (const c of careerItems) {
+    rows.push({
+      id: `career:${c.id}`,
+      title:
+        c.kind === "APPLICATION"
+          ? `Submit: ${c.title}${c.company ? ` (${c.company})` : ""}`
+          : c.kind === "INTERVIEW"
+            ? `Prepare: ${c.title}${c.company ? ` (${c.company})` : ""}`
+            : c.title,
+      category: "CAREER",
+      dueAt: c.at,
+      status: c.status === "IN_PROGRESS" ? "IN_PROGRESS" : "NOT_STARTED",
+      estMinutes: c.kind === "APPLICATION" ? 60 : 30,
+      importance: 4,
+      href: "/career",
+    });
+  }
+  for (const s of startupItems) {
+    rows.push({
+      id: `startup:${s.id}`,
+      title: s.title,
+      category: "STARTUP",
+      dueAt: s.dueAt,
+      status: s.status === "IN_PROGRESS" ? "IN_PROGRESS" : "NOT_STARTED",
+      estMinutes: 60,
+      importance: 4,
+      href: "/startup",
+    });
+  }
+  for (const o of outreach) {
+    if (!o.followUpAt || daysUntil(o.followUpAt, now) < -14) continue;
+    rows.push({
+      id: `research:${o.id}`,
+      title: `Follow up with ${o.lab.professor}`,
+      category: "RESEARCH",
+      dueAt: o.followUpAt,
+      status: "NOT_STARTED",
+      estMinutes: 15,
+      importance: 3,
+      href: "/research",
+    });
+  }
+  return rows;
+}
+
 /** Club applications as rankable actions ("Submit X application"). */
 export function applicationCandidates(
   apps: Awaited<ReturnType<typeof getActiveClubApplications>>,
@@ -224,16 +302,27 @@ export async function getRankedActions(now = new Date()): Promise<{
   top: RankedAction[];
   all: RankedAction[];
 }> {
-  const [assignments, exams, tasks, apps, { tiers }] = await Promise.all([
+  const [assignments, exams, tasks, apps, crossTasks, { tiers }] = await Promise.all([
     getOpenAssignments(),
     getUpcomingExams(14),
     getOpenTasks(),
     getActiveClubApplications(),
+    getCrossSystemTasks(now),
     getProfile(),
   ]);
   const candidates = [
     ...buildCandidates(assignments, exams, tasks, now),
     ...applicationCandidates(apps, now),
+    ...crossTasks.map((t) => ({
+      id: t.id,
+      entityType: "TASK" as const,
+      title: t.title,
+      category: t.category,
+      dueAt: t.dueAt,
+      estMinutes: t.estMinutes,
+      importance: t.importance,
+      status: t.status,
+    })),
   ];
   const ctx = { now, tier1: tiers.tier1, tier2: tiers.tier2 };
   return { top: topActions(candidates, 5, ctx), all: rankActions(candidates, ctx) };
@@ -314,6 +403,9 @@ export async function getWorkloadInputs(
           title: `${a.club.name} application deadline`,
           at: a.deadlineAt as Date,
         })),
+      ...(await getCrossSystemTasks(now))
+        .filter((t) => t.dueAt && t.dueAt >= now)
+        .map((t) => ({ title: t.title, at: t.dueAt as Date })),
     ],
   };
 }
@@ -323,11 +415,12 @@ export async function getWorkloadInputs(
 // ---------------------------------------------------------------------------
 
 export async function getAlerts(now = new Date()): Promise<AlertItem[]> {
-  const [clubApps, changedSources] = await Promise.all([
+  const [clubApps, changedSources, crossTasks] = await Promise.all([
     getActiveClubApplications(),
     db.monitoredSource.findMany({
       where: { lastChangeAt: { gte: addDays(now, -7) } },
     }),
+    getCrossSystemTasks(now),
   ]);
   const [assignments, exams, tasks, conflicts, topics, workloadInputs, dismissed, { profile }] =
     await Promise.all([
@@ -375,13 +468,16 @@ export async function getAlerts(now = new Date()): Promise<AlertItem[]> {
       startAt: e.startAt,
       planGeneratedAt: e.planGeneratedAt,
     })),
-    tasks: tasks.map((t) => ({
-      id: t.id,
-      title: t.title,
-      category: t.category,
-      dueAt: t.dueAt,
-      status: t.status,
-    })),
+    tasks: [
+      ...tasks.map((t) => ({
+        id: t.id,
+        title: t.title,
+        category: t.category,
+        dueAt: t.dueAt,
+        status: t.status,
+      })),
+      ...crossTasks,
+    ],
     openConflicts: conflicts.map((c) => ({
       id: c.id,
       description: c.description,
@@ -628,6 +724,10 @@ export async function getChatContextPack(now = new Date()) {
     goals,
     clubs,
     clubApps,
+    careerItems,
+    skills,
+    labs,
+    startupItems,
   ] = await Promise.all([
     getProfile(),
     getCurrentSemester(),
@@ -641,6 +741,13 @@ export async function getChatContextPack(now = new Date()) {
     db.goal.findMany({ where: { status: "ACTIVE" } }),
     db.club.findMany({ orderBy: { name: "asc" } }),
     getActiveClubApplications(),
+    db.careerItem.findMany({ where: { status: { notIn: ["DONE", "DROPPED"] } } }),
+    db.skill.findMany(),
+    db.researchLab.findMany({
+      where: { status: { not: "NOT_A_FIT" } },
+      include: { outreach: true },
+    }),
+    db.startupItem.findMany({ where: { status: { notIn: ["DONE", "DROPPED"] } } }),
   ]);
   const sessions = await getSessionsInRange(now, addDays(now, 7));
   const workload = forecastWorkload(await getWorkloadInputs(now, 14));
@@ -740,6 +847,41 @@ export async function getChatContextPack(now = new Date()) {
       opensAt: a.opensAt,
       deadlineAt: a.deadlineAt,
       interviewAt: a.interviewAt,
+    })),
+    careerItems: careerItems.map((c) => ({
+      kind: c.kind,
+      title: c.title,
+      company: c.company,
+      track: c.track,
+      at: c.at,
+      status: c.status,
+    })),
+    skills: skills.map((s) => ({
+      name: s.name,
+      category: s.category,
+      currentLevel: s.currentLevel,
+      targetLevel: s.targetLevel,
+      nextAction: s.nextAction,
+    })),
+    researchLabs: labs.map((l) => ({
+      professor: l.professor,
+      lab: l.labName,
+      department: l.department,
+      area: l.area,
+      status: l.status,
+      acceptsUndergrads: l.acceptsUndergrads,
+      nextAction: l.nextAction,
+      pendingFollowUps: l.outreach
+        .filter((o) => o.followUpAt)
+        .map((o) => o.followUpAt),
+    })),
+    startupItems: startupItems.map((s) => ({
+      kind: s.kind,
+      title: s.title,
+      provider: s.provider,
+      dueAt: s.dueAt,
+      status: s.status,
+      nextAction: s.nextAction,
     })),
   };
 }

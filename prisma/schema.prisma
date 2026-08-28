@@ -467,6 +467,7 @@ model ResearchLab {
   nextAction     String?
   status         String    @default("RESEARCHING") // RESEARCHING | POTENTIAL_FIT | CONTACTED | FOLLOW_UP | INTERVIEW | ACCEPTED | NOT_A_FIT
   source         String?
+  confidence     String    @default("UNVERIFIED") // VERIFIED | LIKELY | UNVERIFIED
   lastVerifiedAt DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt

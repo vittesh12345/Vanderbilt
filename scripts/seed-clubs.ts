@@ -146,8 +146,40 @@ async function main() {
     }
   }
 
+  // ---- Starter skill matrix (spec §20) — idempotent by name --------------
+  const SKILLS: {
+    name: string;
+    category: string;
+    currentLevel: number;
+    targetLevel: number;
+    nextAction?: string;
+    resource?: string;
+    timeRequired?: string;
+  }[] = [
+    { name: "Financial modeling", category: "FINANCE", currentLevel: 1, targetLevel: 4, nextAction: "Build a 3-statement model for one company", resource: "VIBC curriculum / WSP self-study", timeRequired: "3h/week" },
+    { name: "Accounting fundamentals", category: "FINANCE", currentLevel: 1, targetLevel: 3, nextAction: "Work through the accounting section of a modeling course" },
+    { name: "Valuation (DCF, comps)", category: "FINANCE", currentLevel: 1, targetLevel: 4, nextAction: "Value one public company end-to-end" },
+    { name: "Excel", category: "FINANCE", currentLevel: 2, targetLevel: 4, nextAction: "Learn keyboard-only modeling", timeRequired: "1h/week" },
+    { name: "Case interviews", category: "CONSULTING", currentLevel: 1, targetLevel: 3, nextAction: "Do 2 practice cases with a partner", resource: "VUCC case workshops" },
+    { name: "Market sizing", category: "CONSULTING", currentLevel: 1, targetLevel: 3, nextAction: "Drill 5 sizing questions" },
+    { name: "Programming (Python/Java)", category: "TECH", currentLevel: 2, targetLevel: 4, nextAction: "Ship one side project this semester", resource: "CS 1101 + VandyApps" },
+    { name: "AI/ML foundations", category: "TECH", currentLevel: 1, targetLevel: 3, nextAction: "Join a VandyAI project team" },
+    { name: "Data science", category: "TECH", currentLevel: 1, targetLevel: 3, resource: "Data Science Club workshops" },
+    { name: "Customer discovery", category: "STARTUP", currentLevel: 2, targetLevel: 4, nextAction: "Run this week's 3 discovery calls" },
+    { name: "Pitching", category: "STARTUP", currentLevel: 1, targetLevel: 4, nextAction: "Draft a 3-minute pitch; test at the Wond'ry", resource: "Wond'ry mentors" },
+    { name: "Public speaking", category: "GENERAL", currentLevel: 2, targetLevel: 4 },
+    { name: "Professional writing & outreach", category: "GENERAL", currentLevel: 2, targetLevel: 4, nextAction: "Send 3 cold outreach emails this week" },
+  ];
+  let skillsCreated = 0;
+  for (const sk of SKILLS) {
+    const existing = await db.skill.findFirst({ where: { name: sk.name } });
+    if (existing) continue;
+    await db.skill.create({ data: sk });
+    skillsCreated++;
+  }
+
   console.log(
-    `Clubs: +${clubsCreated} (of ${data.clubs.length}) · Startup programs: +${programsCreated} · Monitored sources: ${monitorsCreated} upserted · deadlines wired.`,
+    `Clubs: +${clubsCreated} (of ${data.clubs.length}) · Startup programs: +${programsCreated} · Monitored sources: ${monitorsCreated} upserted · Skills: +${skillsCreated} · deadlines wired.`,
   );
 }
 

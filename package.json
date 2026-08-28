@@ -13,9 +13,10 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "seed": "tsx scripts/seed.ts",
-    "setup": "prisma db push && tsx scripts/seed.ts && tsx scripts/seed-clubs.ts",
+    "setup": "prisma db push && tsx scripts/seed.ts && tsx scripts/seed-clubs.ts && tsx scripts/seed-labs.ts",
     "seed:clubs": "tsx scripts/seed-clubs.ts",
-    "monitor": "tsx scripts/monitor-run.ts"
+    "monitor": "tsx scripts/monitor-run.ts",
+    "seed:labs": "tsx scripts/seed-labs.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",

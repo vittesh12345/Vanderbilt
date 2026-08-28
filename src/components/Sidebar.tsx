@@ -54,15 +54,12 @@ const SECTIONS: { title: string; items: NavItem[] }[] = [
     ],
   },
   {
-    title: "Vanderbilt",
-    items: [{ href: "/clubs", label: "Clubs", icon: Users }],
-  },
-  {
-    title: "Expansion",
+    title: "Life systems",
     items: [
-      { href: "#", label: "Career", icon: Briefcase, disabled: true, phase: "Phase 3" },
-      { href: "#", label: "Research", icon: FlaskConical, disabled: true, phase: "Phase 4" },
-      { href: "#", label: "Startup", icon: Rocket, disabled: true, phase: "Phase 5" },
+      { href: "/clubs", label: "Clubs", icon: Users },
+      { href: "/career", label: "Career", icon: Briefcase },
+      { href: "/research", label: "Research", icon: FlaskConical },
+      { href: "/startup", label: "Startup", icon: Rocket },
     ],
   },
 ];
