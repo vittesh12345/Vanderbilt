@@ -29,17 +29,19 @@ export async function POST(req: NextRequest) {
   }
 
   const [assignments, exams, events, records] = await Promise.all([
-    db.assignment.findMany({ select: { title: true, dueAt: true } }),
-    db.exam.findMany({ select: { title: true, startAt: true } }),
-    db.calendarEvent.findMany({ select: { title: true, startAt: true } }),
+    db.assignment.findMany({ select: { title: true, dueAt: true, courseId: true } }),
+    db.exam.findMany({ select: { title: true, startAt: true, courseId: true } }),
+    db.calendarEvent.findMany({ select: { title: true, startAt: true, courseId: true } }),
     db.timeEstimateRecord.findMany(),
   ]);
+  // Dedupe is course-scoped: "Quiz 1" in CS and "Quiz 1" in MATH on the same
+  // day are different items.
   const pool = [
     ...assignments
       .filter((a) => a.dueAt)
-      .map((a) => ({ title: normTitle(a.title), at: a.dueAt as Date })),
-    ...exams.map((e) => ({ title: normTitle(e.title), at: e.startAt })),
-    ...events.map((e) => ({ title: normTitle(e.title), at: e.startAt })),
+      .map((a) => ({ title: normTitle(a.title), at: a.dueAt as Date, courseId: a.courseId as string | null })),
+    ...exams.map((e) => ({ title: normTitle(e.title), at: e.startAt, courseId: e.courseId as string | null })),
+    ...events.map((e) => ({ title: normTitle(e.title), at: e.startAt, courseId: e.courseId })),
   ];
   const estRecords = records.map((r) => ({
     courseId: r.courseId,
@@ -60,11 +62,16 @@ export async function POST(req: NextRequest) {
       continue;
     }
     const nt = normTitle(title);
-    if (pool.some((p) => p.title === nt && isSameDay(p.at, at))) {
+    const itemCourse = item.courseId ?? null;
+    if (
+      pool.some(
+        (p) => p.title === nt && isSameDay(p.at, at) && p.courseId === itemCourse,
+      )
+    ) {
       skipped++;
       continue;
     }
-    pool.push({ title: nt, at });
+    pool.push({ title: nt, at, courseId: itemCourse });
 
     const course = item.courseId
       ? await db.course.findUnique({ where: { id: item.courseId } })

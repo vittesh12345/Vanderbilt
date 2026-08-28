@@ -58,6 +58,13 @@ function norm(s: string): string {
   return s.toLowerCase();
 }
 
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/** Whole-word containment — "art" must not match inside "startup". */
+function wordMatch(hay: string, needle: string): boolean {
+  if (!needle.trim()) return false;
+  return new RegExp(`\\b${escapeRe(needle)}\\b`).test(hay);
+}
+
 export function rankClub(
   club: ClubForRanking,
   profile: RankingProfile,
@@ -71,7 +78,7 @@ export function rankClub(
 
   // Category ↔ interest affinity (the main signal).
   const categoryHits = interests.filter((i) =>
-    affinities.some((a) => a.includes(i) || i.includes(a)),
+    affinities.some((a) => wordMatch(a, i) || wordMatch(i, a)),
   );
   if (categoryHits.length) {
     // The first direct interest↔category hit is the primary signal; extra
@@ -84,7 +91,7 @@ export function rankClub(
   }
 
   // Description mentions an interest directly.
-  const descHits = interests.filter((i) => i.length >= 2 && desc.includes(i));
+  const descHits = interests.filter((i) => i.length >= 2 && wordMatch(desc, i));
   if (descHits.length) {
     score += Math.min(15, descHits.length * 5);
     if (!categoryHits.length)

@@ -31,7 +31,9 @@ export default async function StartupPage() {
   ]);
 
   const openWork = items.filter(
-    (i) => ["TASK", "MILESTONE"].includes(i.kind) && !["DONE", "DROPPED"].includes(i.status),
+    (i) =>
+      ["TASK", "MILESTONE", "LEGAL", "METRIC"].includes(i.kind) &&
+      !["DONE", "DROPPED"].includes(i.status),
   );
   const programs = items.filter((i) =>
     ["PROGRAM", "COMPETITION", "FUNDING"].includes(i.kind),

@@ -399,6 +399,9 @@ model MonitoredSource {
   active          Boolean   @default(true)
   lastCheckedAt   DateTime?
   lastContentHash String?
+  // Normalized text of the last snapshot (capped) — the diff baseline, so a
+  // change summary compares against what was actually there before.
+  lastContentText String?
   lastChangeAt    DateTime?
   lastChangeSummary String?
   createdAt       DateTime  @default(now())

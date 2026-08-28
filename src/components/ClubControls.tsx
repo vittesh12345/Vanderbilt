@@ -6,6 +6,15 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+/** Local calendar day of an ISO timestamp — a UTC slice(0,10) of a 23:59-local
+ *  deadline lands on the NEXT day anywhere west of UTC. */
+function localYmd(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
 const MEMBERSHIPS = [
   "PROSPECT",
   "INTERESTED",
@@ -115,7 +124,7 @@ export function ApplicationTracker({
           cycle: cycle || undefined,
           opensAt: opensAt || undefined,
           deadlineAt: deadlineAt || undefined,
-          status: opensAt && new Date(opensAt) > new Date() ? "NOT_OPEN" : "OPEN",
+          status: opensAt && new Date(`${opensAt}T09:00:00`) > new Date() ? "NOT_OPEN" : "OPEN",
         }),
       });
       setAdding(false);
@@ -161,9 +170,9 @@ export function ApplicationTracker({
             opens{" "}
             <input
               type="date"
-              defaultValue={app.opensAt?.slice(0, 10) ?? ""}
+              defaultValue={localYmd(app.opensAt)}
               onBlur={(e) =>
-                e.target.value !== (app.opensAt?.slice(0, 10) ?? "") &&
+                e.target.value !== localYmd(app.opensAt) &&
                 patch(app.id, { opensAt: e.target.value || null })
               }
               className={inputCls}
@@ -173,9 +182,9 @@ export function ApplicationTracker({
             deadline{" "}
             <input
               type="date"
-              defaultValue={app.deadlineAt?.slice(0, 10) ?? ""}
+              defaultValue={localYmd(app.deadlineAt)}
               onBlur={(e) =>
-                e.target.value !== (app.deadlineAt?.slice(0, 10) ?? "") &&
+                e.target.value !== localYmd(app.deadlineAt) &&
                 patch(app.id, { deadlineAt: e.target.value || null })
               }
               className={inputCls}
@@ -185,9 +194,9 @@ export function ApplicationTracker({
             interview{" "}
             <input
               type="date"
-              defaultValue={app.interviewAt?.slice(0, 10) ?? ""}
+              defaultValue={localYmd(app.interviewAt)}
               onBlur={(e) =>
-                e.target.value !== (app.interviewAt?.slice(0, 10) ?? "") &&
+                e.target.value !== localYmd(app.interviewAt) &&
                 patch(app.id, { interviewAt: e.target.value || null })
               }
               className={inputCls}

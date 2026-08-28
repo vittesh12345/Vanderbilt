@@ -48,6 +48,9 @@ export async function PATCH(
     if (typeof v === "string") data[f] = v.trim() || null;
     else if (v === null) data[f] = null;
   }
+  if ("name" in data && data.name === null) {
+    return NextResponse.json({ error: "name is required" }, { status: 400 });
+  }
   if (CATEGORIES.includes(body.category)) data.category = body.category;
   if (MEMBERSHIPS.includes(body.membership)) data.membership = body.membership;
   if (["HIGH", "MEDIUM", "LOW", "UNRANKED"].includes(body.priority)) {

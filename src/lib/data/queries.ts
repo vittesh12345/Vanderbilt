@@ -204,7 +204,7 @@ export function buildCandidates(
 export async function getCrossSystemTasks(now = new Date()) {
   const [careerItems, startupItems, outreach] = await Promise.all([
     db.careerItem.findMany({
-      where: { status: { notIn: ["DONE", "DROPPED"] }, at: { not: null } },
+      where: { status: { notIn: ["DONE", "DROPPED", "SUBMITTED"] }, at: { not: null } },
     }),
     db.startupItem.findMany({
       where: { status: { in: ["OPEN", "IN_PROGRESS", "WATCHING"] }, dueAt: { not: null } },
@@ -230,6 +230,13 @@ export async function getCrossSystemTasks(now = new Date()) {
   }[] = [];
 
   for (const c of careerItems) {
+    // A time-anchored item that already happened is history, not a to-do;
+    // deadline kinds keep a bounded overdue nag (like research follow-ups).
+    if (c.at) {
+      const past = c.at.getTime() < now.getTime();
+      if (past && ["INTERVIEW", "EVENT", "NETWORKING", "RECRUITER"].includes(c.kind)) continue;
+      if (past && daysUntil(c.at, now) < -14) continue;
+    }
     rows.push({
       id: `career:${c.id}`,
       title:
@@ -404,7 +411,8 @@ export async function getWorkloadInputs(
           at: a.deadlineAt as Date,
         })),
       ...(await getCrossSystemTasks(now))
-        .filter((t) => t.dueAt && t.dueAt >= now)
+        // 15-minute research follow-ups aren't deadline-day workload.
+        .filter((t) => t.dueAt && t.dueAt >= now && t.category !== "RESEARCH")
         .map((t) => ({ title: t.title, at: t.dueAt as Date })),
     ],
   };

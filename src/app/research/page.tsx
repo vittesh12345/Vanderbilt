@@ -39,7 +39,9 @@ export default async function ResearchPage() {
   const contacted = labs.filter((l) =>
     ["CONTACTED", "FOLLOW_UP", "INTERVIEW"].includes(l.status),
   );
-  const followUpsDue = labs.flatMap((l) =>
+  const followUpsDue = labs
+    .filter((l) => !["NOT_A_FIT", "ACCEPTED"].includes(l.status))
+    .flatMap((l) =>
     l.outreach.filter(
       (o) => o.followUpAt && daysUntil(o.followUpAt, now) <= 1,
     ).map((o) => ({ lab: l, outreach: o })),

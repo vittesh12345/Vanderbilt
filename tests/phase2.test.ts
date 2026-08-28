@@ -78,6 +78,29 @@ describe("clubrank", () => {
     expect(r.reason).toMatch(/goal|tier-1|startup/i);
   });
 
+  it("does not match short interests inside longer words ('art' vs 'startup')", () => {
+    const r = rankClub(
+      {
+        id: "5",
+        name: "Entrepreneurship Society",
+        category: "ENTREPRENEURSHIP",
+        description: "startup founders and innovation",
+        membership: "PROSPECT",
+      },
+      { interests: ["art"], tier1: [], tier2: [] },
+    );
+    expect(r.priority).toBe("LOW");
+  });
+
+  it("summarizeChange diffs against a real baseline, not empty", async () => {
+    const { summarizeChange } = await import("@/lib/monitor");
+    const before = "Skip main content Vanderbilt University About Admissions programs overview";
+    const after = before + " applications open september fifteenth";
+    const s = summarizeChange(before, after);
+    expect(s).toMatch(/applications|september/);
+    expect(s).not.toMatch(/Vanderbilt University About/);
+  });
+
   it("rankClubs maps every club", () => {
     const map = rankClubs(
       [

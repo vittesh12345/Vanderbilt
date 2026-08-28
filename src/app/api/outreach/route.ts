@@ -15,6 +15,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Lab not found" }, { status: 404 });
   }
   const at = parseDateInput(body.at, "12:00") ?? new Date();
+  // Logging a new contact fulfills earlier reminders due on or before it.
+  await db.researchOutreach.updateMany({
+    where: { labId, followUpAt: { not: null, lte: at } },
+    data: { followUpAt: null },
+  });
   const entry = await db.researchOutreach.create({
     data: {
       labId,

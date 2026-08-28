@@ -4,6 +4,7 @@ import { parseDateInput } from "@/lib/dates";
 
 const KINDS = ["APPLICATION", "EVENT", "NETWORKING", "INTERVIEW", "RECRUITER", "OTHER"];
 const TRACKS = ["FINANCE", "CONSULTING", "TECH", "OTHER"];
+const STATUSES = ["OPEN", "IN_PROGRESS", "SUBMITTED", "SCHEDULED", "DONE", "DROPPED"];
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
@@ -14,6 +15,7 @@ export async function POST(req: NextRequest) {
   const item = await db.careerItem.create({
     data: {
       kind: KINDS.includes(body.kind) ? body.kind : "OTHER",
+      status: STATUSES.includes(body.status) ? body.status : "OPEN",
       title,
       company:
         typeof body.company === "string" && body.company.trim()

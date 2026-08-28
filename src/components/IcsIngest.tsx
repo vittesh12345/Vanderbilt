@@ -109,6 +109,8 @@ export default function IcsIngest() {
       setRows([]);
       setIcsText("");
       router.refresh();
+    } catch {
+      setError("Network error — try again.");
     } finally {
       setBusy(false);
     }
@@ -166,7 +168,7 @@ export default function IcsIngest() {
           <div className="thin-scroll max-h-96 space-y-1.5 overflow-y-auto pr-1">
             {rows.map((r, i) => (
               <div
-                key={`${r.title}:${r.at}`}
+                key={i} /* rows never reorder; an editable-title key would remount (and collide) */
                 className="flex flex-wrap items-center gap-2 rounded-md border border-[var(--border)] px-2.5 py-1.5"
               >
                 <input

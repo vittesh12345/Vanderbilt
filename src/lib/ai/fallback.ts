@@ -67,13 +67,13 @@ export function heuristicAnswer(question: string, pack: ChatContextPack): string
   // and "what should I study tonight" hits studying, not the budget branch.
   if (/study|exam|test|quiz/.test(q)) return studyAnswer(pack, now);
   if (/prepare|before.*class|economics|next class/.test(q)) return prepAnswer(q, pack);
+  // A named life-system beats the generic deadline/top-action branches, so
+  // "do I have any club deadlines?" answers from club data.
+  if (/club|research|startup|career|intern|recruit/.test(q))
+    return categoryAnswer(q, pack, now);
   if (/deadline|due|next week|coming up/.test(q)) return deadlineAnswer(q, pack, now);
   if (/falling behind|behind|overdue|missed/.test(q)) return behindAnswer(pack, now);
   if (/2 hours|only have|tonight/.test(q)) return budgetAnswer(q, pack, now);
-  // A named life-system beats the generic top-actions branch, so "what should
-  // I do for my startup this week?" answers from startup data.
-  if (/club|research|startup|career|intern|recruit/.test(q))
-    return categoryAnswer(q, pack, now);
   if (/what should i do|top action|priorit/.test(q)) return actionsAnswer(pack, now);
   return briefingAnswer(pack, now);
 }

@@ -108,7 +108,11 @@ export function QuickAdd({
     setBusy(true);
     try {
       const payload: Record<string, string> = { ...(extra ?? {}) };
-      for (const [k, v] of Object.entries(values)) if (v) payload[k] = v;
+      // A select the user never touched still shows its first option — send it.
+      for (const f of fields) {
+        const v = values[f.key] ?? (f.type === "select" ? f.options?.[0] : undefined);
+        if (v) payload[f.key] = v;
+      }
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

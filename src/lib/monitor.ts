@@ -84,7 +84,11 @@ export async function checkSource(sourceId: string): Promise<CheckResult> {
     if (!source.lastContentHash) {
       await db.monitoredSource.update({
         where: { id: source.id },
-        data: { lastCheckedAt: now, lastContentHash: hash },
+        data: {
+          lastCheckedAt: now,
+          lastContentHash: hash,
+          lastContentText: text.slice(0, 4000),
+        },
       });
       return { sourceId, label: source.label, status: "FIRST_SNAPSHOT" };
     }
@@ -96,14 +100,18 @@ export async function checkSource(sourceId: string): Promise<CheckResult> {
       return { sourceId, label: source.label, status: "UNCHANGED" };
     }
 
-    // Changed. We only kept the hash, not the full prior text, so summarize
-    // from what we can see now (the stored summary is refined next change).
-    const summary = summarizeChange("", text.slice(0, 4000));
+    // Changed — diff against the stored baseline so the summary reflects
+    // what actually changed, not the page's boilerplate.
+    const summary = summarizeChange(
+      source.lastContentText ?? "",
+      text.slice(0, 4000),
+    );
     await db.monitoredSource.update({
       where: { id: source.id },
       data: {
         lastCheckedAt: now,
         lastContentHash: hash,
+        lastContentText: text.slice(0, 4000),
         lastChangeAt: now,
         lastChangeSummary: summary,
       },
