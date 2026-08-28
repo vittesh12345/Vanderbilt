@@ -1,0 +1,568 @@
+{
+  "researchedAt": "2026-08-28",
+  "note": "Researched from official sources via web search/fetch on 2026-08-28. confidence=VERIFIED only when the official page was read directly; LIKELY = official-domain search snippets; UNVERIFIED = secondary sources. Always confirm deadlines on the official page.",
+  "clubs": [
+    {
+      "name": "Vanderbilt Investment Club (VIC)",
+      "category": "FINANCE",
+      "description": "Undergraduate club actively managing a long-only, value-oriented equity fund seeded by the Vanderbilt endowment. 50+ students across 15+ majors work on industry coverage teams and a portfolio management team, with training in financial analysis, valuation, and portfolio management. Members have placed into investment banking, private equity, and sales and trading roles.",
+      "website": "https://www.vuinvestmentclub.com/",
+      "sourceUrl": "https://www.vuinvestmentclub.com/",
+      "confidence": "LIKELY",
+      "applicationInfo": "Per site snippets: recruitment starts with information/education sessions covering the club's mission and key accounting and valuation concepts, then a stock pitch case study and a final interview; analysts are typically selected within their first two years.",
+      "meetingInfo": "",
+      "contact": "",
+      "notes": "Site fetch was blocked; details come from official-domain search snippets (vuinvestmentclub.com and its /recruitment and /membership pages). Listed address: Calhoun Hall 201. Also on AnchorLink at anchorlink.vanderbilt.edu/organization/vanderbiltinvestmentclub. Double-check current recruitment timeline on the site each semester.",
+      "area": "finance"
+    },
+    {
+      "name": "Vanderbilt Investment Banking Club (VIBC)",
+      "category": "FINANCE",
+      "description": "Selective ten-week training program preparing Vanderbilt underclassmen for investment banking recruiting: hands-on DCF, LBO, and merger modeling, pitch decks and company analysis, live presentation practice, and structured networking/outreach reps. The site cites a 90% placement rate for the last cohort.",
+      "website": "https://www.vanderbiltibc.org/",
+      "sourceUrl": "https://www.vanderbiltibc.org/",
+      "confidence": "LIKELY",
+      "applicationInfo": "Per site snippets: Fall 2026 applications close September 14, 2026 at 11:59 PM CT, submitted via vanderbiltibc.org; program requires 4-6 hours/week and includes 10+ graded deliverables.",
+      "meetingInfo": "",
+      "contact": "",
+      "notes": "Site fetch was blocked; details are from official-domain (vanderbiltibc.org) search snippets. The Sept 14, 2026 deadline is time-sensitive — verify on the site before relying on it.",
+      "area": "finance"
+    },
+    {
+      "name": "Commodore Capital Group (CCG)",
+      "category": "VC_PE",
+      "description": "Vanderbilt's undergraduate private markets organization, self-described as the premier group for students interested in private financial markets. Built on three pillars — Education, Immersion, and Network — connecting students with private equity and venture capital firms in Nashville and nationally. Members complete a sector case study of the private-market investment process and present a deal report.",
+      "website": "https://vanderbiltccg.com/",
+      "sourceUrl": "https://vanderbiltccg.com/",
+      "confidence": "LIKELY",
+      "applicationInfo": "Per site snippets: application information at vanderbiltccg.com/apply-now; recruits primarily freshmen and sophomores interested in high-finance roles (PE, IB, hedge funds, private credit).",
+      "meetingInfo": "",
+      "contact": "",
+      "notes": "Site fetch was blocked; details are from official-domain (vanderbiltccg.com) snippets. Also on AnchorLink (anchorlink.vanderbilt.edu/organization/commodorecapital) and Instagram @vanderbilt_ccg.",
+      "area": "finance"
+    },
+    {
+      "name": "Vanderbilt Finance Club (VFC)",
+      "category": "FINANCE",
+      "description": "Registered undergraduate finance organization on Vanderbilt's AnchorLink platform (org slug 'vfc'), which also lists its general meetings (e.g., 'Vanderbilt Finance Club Meeting #1'). A detailed public mission statement was not accessible from search results.",
+      "website": "https://anchorlink.vanderbilt.edu/organization/vfc",
+      "sourceUrl": "https://anchorlink.vanderbilt.edu/organization/vfc",
+      "confidence": "LIKELY",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "",
+      "notes": "Existence confirmed via official AnchorLink URL and a LinkedIn page, but AnchorLink is behind an auth/egress wall so the description could not be read. Log into AnchorLink to get mission, contacts, and meeting schedule. Distinct from the Vanderbilt Investment Club.",
+      "area": "finance"
+    },
+    {
+      "name": "Vanderbilt Financial Modeling Club",
+      "category": "FINANCE",
+      "description": "Student club running a 10-week Excel-based financial modeling curriculum: 3-Statement Models, Public Comparables, Precedent Transactions, Unlevered DCF, Merger Models, LBO Models, and Football Field charts, aimed at preparing members for finance internships and jobs.",
+      "website": "https://www.linkedin.com/company/vanderbilt-financial-modeling-club",
+      "sourceUrl": "https://www.linkedin.com/company/vanderbilt-financial-modeling-club",
+      "confidence": "UNVERIFIED",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "",
+      "notes": "Sourced only from the club's LinkedIn page snippet (secondary source, 94 followers — small/newer org). Verify current activity and any AnchorLink registration before listing prominently.",
+      "area": "finance"
+    },
+    {
+      "name": "Owen Finance Club (OFC)",
+      "category": "FINANCE",
+      "description": "Finance club at Vanderbilt's Owen Graduate School of Management providing a forum for students to pursue finance-related interests, including education and training, career development, and personal network development.",
+      "website": "https://anchorlink.vanderbilt.edu/organization/owenfinanceclub",
+      "sourceUrl": "https://business.vanderbilt.edu/about/student-life/clubs-organizations/",
+      "confidence": "LIKELY",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "",
+      "notes": "This is a graduate (Owen MBA/MSF) club, not undergraduate — relevant mainly if the user is a grad student or wants Owen connections. Description from official business.vanderbilt.edu snippets; page fetch was blocked.",
+      "area": "finance"
+    },
+    {
+      "name": "Vanderbilt Women in Business (WiB)",
+      "category": "BUSINESS",
+      "description": "Founded in spring 2015 by six undergraduate women to counter Vanderbilt's homogenous business community; dedicated to uplifting women and historically marginalized identities in business. Over 600 campus members with a leadership team of 30+ students. Closest active Vanderbilt equivalent to a women-in-finance organization found — no Smart Woman Securities chapter surfaced.",
+      "website": "https://www.vanderbiltwib.org/",
+      "sourceUrl": "https://www.vanderbiltwib.org/",
+      "confidence": "LIKELY",
+      "applicationInfo": "Recruitment page exists at vanderbiltwib.org/recruitment; process details were not captured in accessible snippets.",
+      "meetingInfo": "",
+      "contact": "",
+      "notes": "Business-wide rather than finance-specific; included because the assigned women-in-finance search found no dedicated Vanderbilt women-in-finance/SWS chapter. Details from official-domain (vanderbiltwib.org) snippets; fetch blocked.",
+      "area": "finance"
+    },
+    {
+      "name": "Vanderbilt Undergraduate Consulting Club (VUCC)",
+      "category": "CONSULTING",
+      "description": "Vanderbilt's largest consulting student organization, serving 600+ members, dedicated to equipping undergraduates pursuing consulting careers and making the field accessible to all students. Organizes case, resume, and leadership workshops, traveling case competition teams (sponsoring travel and entry to national competitions), and networking events.",
+      "website": "https://www.vanderbiltconsulting.club/",
+      "sourceUrl": "https://www.vanderbiltconsulting.club/apply-contact-us",
+      "confidence": "LIKELY",
+      "applicationInfo": "Recruits on a cycle; if you missed the initial recruitment timeline, the Apply & Contact Us page has a form to join during the year or be notified of the next recruitment cycle.",
+      "meetingInfo": "",
+      "contact": "Instagram: @vuconsultingclub; Anchor Link: anchorlink.vanderbilt.edu/organization/vucc",
+      "notes": "Official site (vanderbiltconsulting.club) was blocked from direct fetch; details come from official-domain search snippets. Check the Apply & Contact Us page for the current semester's recruitment timeline.",
+      "area": "consulting"
+    },
+    {
+      "name": "180 Degrees Consulting at Vanderbilt",
+      "category": "CONSULTING",
+      "description": "Vanderbilt branch (founded January 2024) of the global 180 Degrees Consulting network (170+ branches, 35+ countries). Student-led teams deliver pro-bono consulting to nonprofits and social enterprises in Nashville and beyond, aiming to maximize clients' social impact.",
+      "website": "https://www.180dcvanderbilt.com/",
+      "sourceUrl": "https://www.180dcvanderbilt.com/recruitment",
+      "confidence": "LIKELY",
+      "applicationInfo": "Three-part recruitment (per official recruitment page): written application (resume drop, short answers, video response), a collaborative assessment (group case-style problem-solving exercise), and a panel-style behavioral interview with a senior member. All grade levels eligible; no prior consulting experience expected for freshmen/sophomores. Fall 2025 Business Analyst recruitment was referenced.",
+      "meetingInfo": "",
+      "contact": "Instagram: @180dcvanderbilt; Anchor Link: anchorlink.vanderbilt.edu/organization/180dc",
+      "notes": "Recruitment details came from search snippets of the official site (direct fetch blocked); confirm the current cycle's dates on 180dcvanderbilt.com/recruitment or their Instagram.",
+      "area": "consulting"
+    },
+    {
+      "name": "Students Consulting for Nonprofit Organizations (SCNO)",
+      "category": "CONSULTING",
+      "description": "Vanderbilt chapter (established 2009) providing professional pro-bono consulting to Nashville nonprofits and social enterprises; has served 40+ organizations. Members join teams of five or six paired with a nonprofit whose executives present a real problem; the team builds a proposal over the year. Open to all years and majors, from Economics to Engineering.",
+      "website": "https://www.vanderbiltscno.com/",
+      "sourceUrl": "https://my.vanderbilt.edu/vandyscno/about-us/",
+      "confidence": "LIKELY",
+      "applicationInfo": "Applies via a written application (a past cycle's InnerVU recruitment calendar listed an early-September deadline via vandy.link/scno/application); the club encourages applicants from all backgrounds and majors and holds info sessions posted on Anchor Link.",
+      "meetingInfo": "",
+      "contact": "Anchor Link: anchorlink.vanderbilt.edu/organization/SCNO",
+      "notes": "The September 9 deadline found is from a prior year's InnerVU post — verify current dates at vanderbiltscno.com/application-process. Club maintains both my.vanderbilt.edu/vandyscno and vanderbiltscno.com.",
+      "area": "consulting"
+    },
+    {
+      "name": "Vanderbilt Case Competition Club (VC3)",
+      "category": "CONSULTING",
+      "description": "Organization dedicated to preparing students to compete in case competitions nationwide through education, financial support, and hands-on training via sponsored events. Has organized the Vanderbilt Undergraduate Innovation Challenge (VUIC), bringing students from all disciplines together to solve problems facing Vanderbilt's campus and community.",
+      "website": "https://www.vandycasecomp.org/",
+      "sourceUrl": "https://www.vandycasecomp.org/",
+      "confidence": "UNVERIFIED",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "Anchor Link: anchorlink.vanderbilt.edu/organization/vc3",
+      "notes": "Possible inactive org: vandycasecomp.org did not resolve when checked (DNS failure) and indexed content references VUIC 2021. Verify current status on Anchor Link (organization/vc3) before adding to your app; VUCC also runs case competition teams and may have absorbed this niche.",
+      "area": "consulting"
+    },
+    {
+      "name": "Owen Strategy and Consulting Club (OSCC)",
+      "category": "CONSULTING",
+      "description": "Student-run club at Vanderbilt's Owen Graduate School of Management for MBA students interested in consulting and corporate strategy. Provides interview preparation, resources, and networking; a Vanderbilt Business article describes board-led case prep sessions running Sunday nights from mid-August through the end of October, with members targeting roughly 40 practice cases before interviews.",
+      "website": "https://anchorlink.vanderbilt.edu/organization/OSCC",
+      "sourceUrl": "https://business.vanderbilt.edu/news/2018/01/08/become-consultant-vanderbilt-business/",
+      "confidence": "LIKELY",
+      "applicationInfo": "",
+      "meetingInfo": "Case prep sessions Sunday nights, mid-August through end of October (as described in a 2018 Vanderbilt Business article — cadence may have changed).",
+      "contact": "Anchor Link: anchorlink.vanderbilt.edu/organization/OSCC",
+      "notes": "Graduate (MBA) club — only relevant if you're at Owen or tracking the grad ecosystem. Meeting cadence sourced from a 2018 official article; confirm current schedule.",
+      "area": "consulting"
+    },
+    {
+      "name": "Anchor Marketing",
+      "category": "BUSINESS",
+      "description": "Team of Vanderbilt students exploring the marketing industry and developing skills through real-world consulting work. Notably inclusive: open to members whether experienced or new to the field. Members build a marketing foundation through a combination of classroom-style learning and hands-on project experience.",
+      "website": "",
+      "sourceUrl": "https://vanderbilthustler.com/2024/03/01/charting-the-course-exploring-vanderbilts-business-organizations-landscape/",
+      "confidence": "UNVERIFIED",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "",
+      "notes": "Sourced from a March 2024 Vanderbilt Hustler article (student newspaper, secondary source); the Hustler and Anchor Link were both blocked from direct fetch. Search Anchor Link for the org's official page and current status.",
+      "area": "consulting"
+    },
+    {
+      "name": "VandyHacks",
+      "category": "TECH",
+      "description": "Vanderbilt's student-run hackathon organization, founded in 2015, that hosts one of the largest hackathons in the South: a 24-hour in-person event with student and company-led workshops, a career fair, internship panels, speakers, catering, and prizes. Aims to foster hacker culture and build the CS community at Vanderbilt.",
+      "website": "https://vandyhacks.org/",
+      "sourceUrl": "https://vandyhacks.org/",
+      "applicationInfo": "Hacker registration anticipated to open mid-August and close early October; applications go through apply.vandyhacks.org.",
+      "meetingInfo": "",
+      "contact": "",
+      "confidence": "LIKELY",
+      "notes": "Direct fetch of vandyhacks.org was blocked; details come from official-domain search snippets. A 'March 21-22' event date appeared in results but the year/edition is ambiguous — check vandyhacks.org for the current cycle. Also on AnchorLink: anchorlink.vanderbilt.edu/organization/vandyhacks. Registration windows are for hackers; organizer-team recruitment is separate and not stated in sources.",
+      "area": "tech"
+    },
+    {
+      "name": "VandyApps",
+      "category": "TECH",
+      "description": "Vanderbilt's computer science and app development club, founded in 2009 as the Vanderbilt Mobile Applications Team. Teaches software engineering through multi-week sessions (iOS, Android, Linux command line, advanced programming), hosts Tech Talks from Vanderbilt and Nashville speakers, runs Code Golf competitions co-hosted by Google, and prepares members for technical interviews.",
+      "website": "https://vandyapps.github.io/",
+      "sourceUrl": "https://vandyapps.github.io/about/",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "",
+      "confidence": "LIKELY",
+      "notes": "Details from official-domain snippets (vandyapps.github.io and vandyapps.club); direct fetches blocked. Club maintains a Slack community and a GitHub org (github.com/VandyApps). Two site domains appeared (vandyapps.github.io and vandyapps.club) — verify which is current. AnchorLink: anchorlink.vanderbilt.edu/organization/vandyapps.",
+      "area": "tech"
+    },
+    {
+      "name": "Change++",
+      "category": "TECH",
+      "description": "Student organization founded in 2019 that builds free custom full-stack software for nonprofits. Partners with 5-7 nonprofits per year; members work in company-style teams of a product manager, engineering manager, UX designer, and 3-6 developers. Has shipped 25+ projects, saving partners an estimated $10,000-$100,000 in operational costs. Welcomes design, management, and marketing skills too.",
+      "website": "https://changeplusplus.org/",
+      "sourceUrl": "https://changeplusplus.org/",
+      "applicationInfo": "Holds information sessions about its application process; a previous recruitment info session ran 5-6 PM in Featheringill Hall.",
+      "meetingInfo": "",
+      "contact": "",
+      "confidence": "LIKELY",
+      "notes": "Details from official-domain snippets (changeplusplus.org, AnchorLink, LinkedIn); direct fetch blocked. Recruitment is typically application-based each fall — confirm current-cycle dates on changeplusplus.org or AnchorLink (anchorlink.vanderbilt.edu/organization/changeplusplus).",
+      "area": "tech"
+    },
+    {
+      "name": "VandyAI",
+      "category": "AI",
+      "description": "Vanderbilt's community for artificial intelligence enthusiasts, with a mission to foster learning and discovery around innovative AI technologies. Hosts weekly meetings, guest speakers, AI workshops, and collaborative project teams and competitions.",
+      "website": "https://vandyai.github.io/",
+      "sourceUrl": "https://vandyai.github.io/",
+      "applicationInfo": "",
+      "meetingInfo": "Weekly meetings (per club site snippet).",
+      "contact": "",
+      "confidence": "LIKELY",
+      "notes": "Sourced from the club's own site snippet (vandyai.github.io); direct fetch blocked, so verify current activity level and meeting schedule. Note this is distinct from Vanderbilt's institutional AI programs (Amplify GenAI Center, DSI AI Showcase).",
+      "area": "tech"
+    },
+    {
+      "name": "Vanderbilt Data Science Club (VDS)",
+      "category": "TECH",
+      "description": "Undergraduate club for students passionate about data-driven solutions to real-world community problems. Offers hands-on projects, workshops (e.g., Jupyter Notebooks sessions), and general body meetings where project opportunities are announced. Welcomes both experienced students and beginners.",
+      "website": "https://vandydatascienceclub.github.io/",
+      "sourceUrl": "https://vandydatascienceclub.github.io/",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "",
+      "confidence": "LIKELY",
+      "notes": "Sourced from club site snippet plus Vanderbilt's undergrad-datascience blog posts (2022 GBM announcement); direct fetches blocked. AnchorLink handle appears to be 'datascience' (anchorlink.vanderbilt.edu/organization/datascience). Verify the club is currently active — some sourced posts date to 2022. The DSI Student Council (anchorlink.vanderbilt.edu/organization/dsisc) is a separate org.",
+      "area": "tech"
+    },
+    {
+      "name": "Vanderbilt Women in Computing (ACM-W)",
+      "category": "TECH",
+      "description": "Student organization supporting and promoting inclusion in computing at Vanderbilt, welcoming people of all genders and experience levels. Best known for hosting Emerge, a free annual one-day conference on emerging technologies — past themes include AI ('I, Chatbot', 2023), smart home tech (2021), VR, and autonomous vehicles, drawing 300+ attendees.",
+      "website": "",
+      "sourceUrl": "https://engineering.vanderbilt.edu/2023/03/30/learn-more-about-chatbots-at-a-free-student-organized-ai-conference-april-8/",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "",
+      "confidence": "LIKELY",
+      "notes": "Sourced from official vanderbilt.edu news/engineering snippets; no dedicated club website found in results (has a Facebook page: facebook.com/VandyWomenInComputing). Most recent sourced Emerge conference is 2023 — confirm current activity and AnchorLink page before listing events.",
+      "area": "tech"
+    },
+    {
+      "name": "Vanderbilt Innovation and Entrepreneurship Society (VINES)",
+      "category": "ENTREPRENEURSHIP",
+      "description": "Vanderbilt's undergraduate entrepreneurship organization. VINES serves passionate innovators in executing ideas by providing resources, education, and an entrepreneurial community. Programs include the Startup Cohort, Speaker Series, 1000 Pitches, and a startup weekend; its flagship 48 Hour Launch has undergraduates form teams, develop an idea, and pitch to professional judges for prizes.",
+      "website": "https://vines.vu/",
+      "sourceUrl": "https://vines.vu/",
+      "confidence": "LIKELY",
+      "applicationInfo": "Per a 2021 interview with a VINES leader: any student can join at any time through Anchor Link or the club GroupMe; the only application-based program is the Innovation and Entrepreneurship Cohort (about 25 students per semester).",
+      "meetingInfo": "",
+      "contact": "",
+      "notes": "Facts come from vines.vu and anchorlink.vanderbilt.edu search snippets (direct fetches were blocked). Cohort/application details date to a 2021 secondary-source interview (boringbusinessnerd.com) — verify current process on vines.vu or AnchorLink (anchorlink.vanderbilt.edu/organization/vines).",
+      "area": "entrepreneurship"
+    },
+    {
+      "name": "Vanderbilt Social Venture Club",
+      "category": "ENTREPRENEURSHIP",
+      "description": "Student leadership arm of Vanderbilt's Center for Social Ventures (Turner Family Center): an interdisciplinary, student-led organization developing socially and environmentally conscious leaders, preparing students to drive systemic change through market-driven forces and social entrepreneurship. Any Vanderbilt student may engage with programming; members get deeper social-impact and social-enterprise opportunities.",
+      "website": "https://anchorlink.vanderbilt.edu/organization/tfc",
+      "sourceUrl": "https://anchorlink.vanderbilt.edu/organization/tfc",
+      "confidence": "LIKELY",
+      "applicationInfo": "Any Vanderbilt student is welcome to engage with programming; fuller engagement comes through club membership (per AnchorLink snippet).",
+      "meetingInfo": "",
+      "contact": "",
+      "notes": "Based on AnchorLink search snippet; AnchorLink URL slug is 'tfc' (Turner Family Center). The Turner Family Center itself is historically graduate-focused and runs a Social Ventures Summit (typically February) — check turnerfamilycenter.com/studentengagement for current undergrad vs. grad scope.",
+      "area": "entrepreneurship"
+    },
+    {
+      "name": "Owen Venture and Entrepreneurship Club (OVEC)",
+      "category": "ENTREPRENEURSHIP",
+      "description": "Student-run club at Vanderbilt's Owen Graduate School of Management building a community of entrepreneurs. It gives students exposure to all things entrepreneurial, including fundraising, and supports those starting businesses, joining startups, or pursuing venture capital. Works with the Owen Center for Entrepreneurship on networking with Nashville founders and VCs; launched the Vanderbilt Entrepreneurship Conference.",
+      "website": "https://anchorlink.vanderbilt.edu/organization/owenvec",
+      "sourceUrl": "https://business.vanderbilt.edu/news/2019/12/10/owen-venture-and-entrepreneurship-club-helps-students-build-community-and-raise-capital/",
+      "confidence": "LIKELY",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "",
+      "notes": "Graduate (Vanderbilt Business/MBA) club, not undergraduate — relevant mainly if the user is in a Vanderbilt Business program. Membership figure of 155 members is from a 2019 official article. Events appear on vanderbiltc4e.com (Owen Center for Entrepreneurship).",
+      "area": "entrepreneurship"
+    },
+    {
+      "name": "Design for America - Vanderbilt Studio",
+      "category": "ENTREPRENEURSHIP",
+      "description": "Vanderbilt chapter (studio) of Design for America, a national network of student innovators using design-thinking skills for local social impact. Students in campus studios work on real-world social-good design projects alongside faculty and staff mentors. Listed as an active organization in Vanderbilt's AnchorLink directory and in DFA's global studio network.",
+      "website": "https://anchorlink.vanderbilt.edu/organization/designforamerica",
+      "sourceUrl": "https://www.designforamerica.org/studios",
+      "confidence": "LIKELY",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "",
+      "notes": "Description of the DFA model comes from the national organization; Vanderbilt-specific details (meetings, recruitment) were not stated in accessible sources — check the AnchorLink page or the dfa.vanderbilt Facebook/Instagram for current activity.",
+      "area": "entrepreneurship"
+    },
+    {
+      "name": "Vanderbilt Innovation Council (VIC)",
+      "category": "ENTREPRENEURSHIP",
+      "description": "Described as a diverse Vanderbilt organization committed to fostering innovation in Nashville and the Southeast, with student members drawn from all 10 of Vanderbilt's schools, aiming to build innovation ecosystems centered on campus.",
+      "website": "",
+      "sourceUrl": "https://universityinnovation.org/wiki/School:Vanderbilt_University",
+      "confidence": "UNVERIFIED",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "",
+      "notes": "Sourced only from the University Innovation Fellows wiki (secondary, possibly dated). No AnchorLink page surfaced in searches — verify the group still exists before listing it in the app.",
+      "area": "entrepreneurship"
+    },
+    {
+      "name": "Product Space @ Vanderbilt",
+      "category": "PRODUCT",
+      "description": "Vanderbilt's product management community, founded Spring 2021 to cultivate product leaders at the intersection of business and technology. Its core offering is a fellowship — a training program for breaking into product management — with three components: community (alumni and student networking), curriculum (weekly instructional and experiential workshops), and capstone (case studies and design challenges).",
+      "website": "https://productspacevandy.framer.website/",
+      "sourceUrl": "https://www.vanderbilt.edu/innervu/news/product-space-fellowship-recruitment",
+      "confidence": "LIKELY",
+      "applicationInfo": "Fellowship recruitment runs via application, with info sessions posted on AnchorLink and a public Fellowship Recruitment Hub on Notion (productspacevandy.notion.site). No internships required — applicants are evaluated on classroom/extracurricular learning, how it translates to product, and curiosity/excitement to learn.",
+      "meetingInfo": "Fellows attend weekly instructional and experiential workshops (per the fellowship description).",
+      "contact": "",
+      "notes": "Recruitment timing varies by semester — check the Notion recruitment hub and AnchorLink (anchorlink.vanderbilt.edu/organization/productspace) for the current cycle. Pages could not be fetched directly from this environment.",
+      "area": "vc-product"
+    },
+    {
+      "name": "Alpha Kappa Psi (Omega Nu Chapter)",
+      "category": "BUSINESS",
+      "description": "Vanderbilt's oldest and largest co-ed professional business fraternity, established in 2006 (Omega Nu chapter). Members get access to a network of current members and alumni for exploring career interests, internship networking, and interview prep, and complete a 6-week Business Development Program upon joining. Relevant to finance and consulting recruiting pipelines.",
+      "website": "https://www.vanderbiltakpsi.com/",
+      "sourceUrl": "https://www.vanderbiltakpsi.com/recruitment",
+      "confidence": "LIKELY",
+      "applicationInfo": "Recruitment via application posted on vanderbiltakpsi.com and AnchorLink; resumes are reviewed blindly (names and affiliations removed). A recent cycle ran Jan 14–24, 2025 (spring recruitment).",
+      "meetingInfo": "",
+      "contact": "",
+      "notes": "The vanderbiltakpsi.com domain did not resolve from this environment (possible site move) — verify the current site/Linktree and this year's rush dates on AnchorLink. Recruitment dates change each cycle.",
+      "area": "vc-product"
+    },
+    {
+      "name": "Delta Sigma Pi (Omicron Chapter)",
+      "category": "BUSINESS",
+      "description": "Co-ed professional business fraternity founded on scholarship, professionalism, and brotherhood; the Omicron chapter was reinstalled at Vanderbilt (announced 2018, initiated 2019 per differing sources). Brothers mentor each other, prep for interviews together, and run professional development within the chapter. Known as one of Vanderbilt's two professional business fraternities alongside AKPsi.",
+      "website": "https://www.vudsp.org/",
+      "sourceUrl": "https://www.vudsp.org/readme",
+      "confidence": "LIKELY",
+      "applicationInfo": "Recruitment described on the 'Become a DeltaSig' page (vudsp.org/readme): structured around an equitable candidate experience, an educational professional-development journey, and cultivating diverse, high-caliber membership; the chapter looks for passion, intellectual curiosity, and enterprising spirit. Secondary coverage describes a competitive multi-round process.",
+      "meetingInfo": "",
+      "contact": "Instagram @vudsp; LinkedIn: linkedin.com/company/vudsp",
+      "notes": "Reinstallation year reported as 2018 in national DSP news and 2019 in chapter materials — minor discrepancy. Site blocked from fetching here; confirm current rush timeline on vudsp.org or Instagram.",
+      "area": "vc-product"
+    },
+    {
+      "name": "Vanderbilt Business Review",
+      "category": "BUSINESS",
+      "description": "Student-produced undergraduate business publication described as connecting the Vanderbilt student community with the broader business world; publishes business-focused articles and analysis (including coverage of campus business orgs like AKPsi recruitment). A writing/editorial option for students building a business profile rather than a recruiting pipeline club.",
+      "website": "https://vanderbiltbusinessreview.com/",
+      "sourceUrl": "https://vanderbiltbusinessreview.com/an-inside-look-at-the-recruitment-process-at-business-fraternity-akpsi/",
+      "confidence": "UNVERIFIED",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "X/Twitter: @VandyBizReview",
+      "notes": "Existence confirmed via its own domain and X account appearing in search results, but the descriptive claim ('premier undergraduate business publication') comes from aggregated search content — verify current activity and how to join on their site or AnchorLink.",
+      "area": "vc-product"
+    }
+  ],
+  "startupPrograms": [
+    {
+      "name": "Wond'ry IMPACT Program",
+      "category": "ENTREPRENEURSHIP",
+      "description": "Seen 2026-08-28: intensive three-year Wond'ry program for undergraduates to turn innovative research into scalable, human-centered commercialization — coursework, internships, funding, and commercialization support. Open to first- and second-year Vanderbilt undergraduates across all majors. Three phases (uncover, invent, propel); ~60 students since fall 2025 launch; teams pitch at the Annual IMPACT Summit.",
+      "website": "https://www.vanderbilt.edu/the-wondry/impact-program/",
+      "sourceUrl": "https://www.vanderbilt.edu/the-wondry/impact-program/",
+      "applicationInfo": "Applications are open with a deadline of September 1, 2026 (as stated in official-domain search snippet).",
+      "meetingInfo": "",
+      "contact": "",
+      "confidence": "LIKELY",
+      "notes": "vanderbilt.edu blocked from direct fetch; deadline came from a Google snippet of the official IMPACT page — confirm on the page before relying on Sept 1, 2026.",
+      "area": "startup-resources"
+    },
+    {
+      "name": "Wond'ry Sullivan Family Ideator Program",
+      "category": "ENTREPRENEURSHIP",
+      "description": "Seen 2026-08-28: free, noncredit two-part idea-evaluation program run with the NSF I-Corps Mid-South Hub for university-affiliated innovators (students, staff, faculty, alumni) who haven't formed an entity yet. Six virtual interactive sessions plus required instructor/mentor office hours; 20+ customer discovery interviews required; participants pitch for potential microgrant funding. Summer 2026 cohort ran Tuesdays June 23 - July 28.",
+      "website": "https://www.vanderbilt.edu/the-wondry/sullivan-family-ideator/",
+      "sourceUrl": "https://www.vanderbilt.edu/the-wondry/sullivan-family-ideator/",
+      "applicationInfo": "Search results indicate fall 2026 cohort registration deadline of September 1, 2026 via events.vanderbilt.edu (Sullivan Family Ideator Program Registration) — verify, snippet-sourced.",
+      "meetingInfo": "",
+      "contact": "",
+      "confidence": "LIKELY",
+      "notes": "Completing the full Ideator program makes you eligible for microgrant funding and to apply to the Builder Program. Registration page: https://events.vanderbilt.edu/event/50819-sullivan-family-ideator-program-registration",
+      "area": "startup-resources"
+    },
+    {
+      "name": "Wond'ry Builder Program",
+      "category": "ENTREPRENEURSHIP",
+      "description": "Seen 2026-08-28: middle stage of the Wond'ry's Ideator-Builder-Founder startup continuum. Provides tools to turn a validated idea into a tangible product or service with potential to develop into a business. Students who successfully complete the full Sullivan Family Ideator Program become eligible for microgrant funding and can apply to continue into Builder.",
+      "website": "https://www.vanderbilt.edu/the-wondry/programs/",
+      "sourceUrl": "https://www.vanderbilt.edu/the-wondry/programs/",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "",
+      "confidence": "LIKELY",
+      "notes": "Snippet-sourced; cohort dates and application windows not stated in results — check the Wond'ry programs page for the current Builder cohort.",
+      "area": "startup-resources"
+    },
+    {
+      "name": "Wond'ry Founder Program",
+      "category": "ENTREPRENEURSHIP",
+      "description": "Seen 2026-08-28: the Wond'ry's top-stage program for established ventures, providing resources, connections, mentorship, and funding opportunities. Stated requirements: completion of the Sullivan Family Ideator and/or Builder Programs or NSF I-Corps, an official legal entity established before applying, and ideally evidence of product-market fit with paying customers or pilots.",
+      "website": "https://www.vanderbilt.edu/the-wondry/entrepreneurship/",
+      "sourceUrl": "https://www.vanderbilt.edu/the-wondry/entrepreneurship/",
+      "applicationInfo": "Applications to the Founder Program are open year-round; selected teams are invited to join as space becomes available (as stated in search results).",
+      "meetingInfo": "",
+      "contact": "",
+      "confidence": "LIKELY",
+      "notes": "A search hit for the dedicated Founder Program page appeared only via a mirror domain (5gfastvpn.com) — use the official vanderbilt.edu/the-wondry site, not that mirror.",
+      "area": "startup-resources"
+    },
+    {
+      "name": "Wond'ry Mentors in Residence (mentorship network)",
+      "category": "ENTREPRENEURSHIP",
+      "description": "Seen 2026-08-28: network of 230+ entrepreneurs, executives, and industry experts across disciplines who share experience with the Wond'ry ecosystem through one-on-one, personalized guidance. Program participants get a dedicated mentor plus 1:1 office hours with instructors. Mentor network browsable at wondrymentors.com.",
+      "website": "https://www.wondrymentors.com/",
+      "sourceUrl": "https://www.vanderbilt.edu/thewondry/become-a-mentor/",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "wondrymentorship@vanderbilt.edu",
+      "confidence": "LIKELY",
+      "notes": "The stated email is for people wanting to BECOME a mentor; how students book mentor time was not stated in the snippets — check wondrymentors.com (blocked from fetch here).",
+      "area": "startup-resources"
+    },
+    {
+      "name": "Wond'ry Makerspaces (mechanical, electrical, fiber arts)",
+      "category": "ENTREPRENEURSHIP",
+      "description": "Seen 2026-08-28: no-cost prototyping facilities for the Vanderbilt community and Wond'ry partners — Mechanical Makerspace (3D printing, laser cutting, plastics forming, powered/analog hand tools for plastics, wood, metals, textiles), Electrical Makerspace, and Fiber Arts Build Lab. Access requires a ~1-hour safety seminar; extra training unlocks specialized machines (vacuum former, molding/casting, sewing).",
+      "website": "https://www.vanderbilt.edu/the-wondry/making-and-design/",
+      "sourceUrl": "https://www.vanderbilt.edu/the-wondry/mechanical-makerspace/",
+      "applicationInfo": "",
+      "meetingInfo": "During the academic year, safety seminars are held Monday-Thursday at 7:00 PM or by appointment (as stated in snippet).",
+      "contact": "",
+      "confidence": "LIKELY",
+      "notes": "Also relevant: TN Maker Fest, the Wond'ry's annual celebration of making, stated as Sept 26, 2026 in search results — verify date.",
+      "area": "startup-resources"
+    },
+    {
+      "name": "Sohr Grants (Owen Graduate School of Management)",
+      "category": "ENTREPRENEURSHIP",
+      "description": "Seen 2026-08-28: $25,000 grants endowed by Jim Sohr (BE'86, MBA'90) to promote student entrepreneurship at the Owen School. Students pitch their ideas to a panel of seasoned entrepreneurs who vote on awards; sources state funding for a maximum of five students each year.",
+      "website": "https://business.vanderbilt.edu/news/2017/12/19/team-leaf-wins-25000-sohr-grant/",
+      "sourceUrl": "https://business.vanderbilt.edu/news/2017/12/19/team-leaf-wins-25000-sohr-grant/",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "",
+      "confidence": "LIKELY",
+      "notes": "Details drawn from an official-domain 2017 article plus the secondary VINES guide (vines.vu); undergraduate eligibility and the current cycle/amount need confirming with Owen or the Wond'ry.",
+      "area": "startup-resources"
+    },
+    {
+      "name": "SEC Student Pitch Competition (Wond'ry nomination)",
+      "category": "ENTREPRENEURSHIP",
+      "description": "Seen 2026-08-28: annual startup pitch competition among student teams from all 16 SEC universities, with a $25,000 prize fund; top three teams pitch a judging panel. Each university sends one team, and the Wond'ry nominates Vanderbilt's startup (e.g., Brace Cap, 2024 winner). Vanderbilt hosted the 10th annual edition in October 2025.",
+      "website": "https://www.vanderbilt.edu/thewondry/competitions/",
+      "sourceUrl": "https://www.vanderbilt.edu/the-wondry/2024/11/15/sudiksha-singhal-with-brace-cap-wins-2024-sec-pitch-competition/",
+      "applicationInfo": "",
+      "meetingInfo": "",
+      "contact": "",
+      "confidence": "LIKELY",
+      "notes": "Nomination process not stated in snippets — sources say to contact the Wond'ry directly; watch the Wond'ry competitions page for the 2026 cycle.",
+      "area": "startup-resources"
+    }
+  ],
+  "monitors": [
+    {
+      "url": "https://www.vuinvestmentclub.com/recruitment",
+      "label": "VIC recruitment page (info sessions, case study, interview timeline)",
+      "kind": "CLUB"
+    },
+    {
+      "url": "https://www.vanderbiltibc.org/",
+      "label": "VIBC application page (Fall 2026 deadline Sept 14, 2026 per snippet)",
+      "kind": "CLUB"
+    },
+    {
+      "url": "https://vanderbiltccg.com/apply-now",
+      "label": "Commodore Capital Group application information",
+      "kind": "CLUB"
+    },
+    {
+      "url": "https://www.vanderbiltconsulting.club/apply-contact-us",
+      "label": "VUCC Apply & Contact Us (recruitment timeline)",
+      "kind": "CLUB"
+    },
+    {
+      "url": "https://www.180dcvanderbilt.com/recruitment",
+      "label": "180 Degrees Consulting Vanderbilt recruitment page",
+      "kind": "CLUB"
+    },
+    {
+      "url": "https://www.vanderbiltscno.com/application-process",
+      "label": "Vanderbilt SCNO application process page",
+      "kind": "CLUB"
+    },
+    {
+      "url": "https://apply.vandyhacks.org/",
+      "label": "VandyHacks hacker application portal (registration opens ~mid-August, closes early October)",
+      "kind": "CLUB"
+    },
+    {
+      "url": "https://changeplusplus.org/",
+      "label": "Change++ site - fall recruitment/application announcements",
+      "kind": "CLUB"
+    },
+    {
+      "url": "https://anchorlink.vanderbilt.edu/organizations",
+      "label": "AnchorLink student organization directory (official listing for all VU clubs)",
+      "kind": "VU_CALENDAR"
+    },
+    {
+      "url": "https://vines.vu/48hrlaunch/",
+      "label": "VINES 48 Hour Launch (flagship startup-weekend event page)",
+      "kind": "CLUB"
+    },
+    {
+      "url": "https://www.vanderbilt.edu/the-wondry/student-organizations/",
+      "label": "The Wond'ry - Student Organizations (Wond'ry-affiliated org roster and support programs)",
+      "kind": "OTHER"
+    },
+    {
+      "url": "https://vanderbiltc4e.com/",
+      "label": "Owen Center for Entrepreneurship events (48 Hour Launch, OVEC socials, entrepreneurship programming)",
+      "kind": "STARTUP"
+    },
+    {
+      "url": "https://www.vanderbiltakpsi.com/recruitment",
+      "label": "Vanderbilt AKPsi — Recruitment page",
+      "kind": "CLUB"
+    },
+    {
+      "url": "https://productspacevandy.notion.site/Fellowship-Recruitment-Hub-f5311deea59b46cfa5d3fd0910c69a77",
+      "label": "Product Space — Fellowship Recruitment Hub",
+      "kind": "CLUB"
+    },
+    {
+      "url": "https://www.vanderbilt.edu/the-wondry/programs/",
+      "label": "Wond'ry programs page (Ideator/Builder/Founder cohorts and dates)",
+      "kind": "STARTUP"
+    },
+    {
+      "url": "https://www.vanderbilt.edu/the-wondry/impact-program/",
+      "label": "Wond'ry IMPACT Program (application deadline Sept 1, 2026 per snippet)",
+      "kind": "STARTUP"
+    },
+    {
+      "url": "https://www.vanderbilt.edu/the-wondry/sullivan-family-ideator/",
+      "label": "Sullivan Family Ideator cohort registration and deadlines",
+      "kind": "STARTUP"
+    },
+    {
+      "url": "https://www.vanderbilt.edu/thewondry/competitions/",
+      "label": "Wond'ry competitions page (SEC Pitch and other contests)",
+      "kind": "STARTUP"
+    }
+  ]
+}

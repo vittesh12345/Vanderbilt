@@ -39,9 +39,15 @@ confirm things, complete things, and make decisions.
   should I do if I only have 2 hours tonight?"), with a full heuristic
   fallback when no API key is configured
 
-Phases 2–5 (Vanderbilt club intelligence, Career OS, Research OS, Startup OS)
-have their data model and architecture in place — see `docs/PHASES.md` and
-`docs/ARCHITECTURE.md`.
+**Phase 2 (Vanderbilt Intelligence) is also live**: a club database seeded
+with 28 real Vanderbilt organizations (researched from official sources, each
+with provenance + confidence + last-verified date), a recommendation engine
+that ranks them against YOUR interests/tiers/goals with reasons, an
+application tracker wired into alerts and the daily Top-5, a web-monitoring
+loop (18 watched recruitment/program pages, `npm run monitor` for cron), and a
+Brightspace iCal-feed adapter. Run `npm run seed:clubs` to load the researched
+set. Phases 3–5 (Career, Research, Startup OS) have their data model and
+architecture in place — see `docs/PHASES.md` and `docs/ARCHITECTURE.md`.
 
 ## Quickstart
 

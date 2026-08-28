@@ -114,6 +114,15 @@ export async function getOpenTasks() {
   });
 }
 
+/** Club applications still in play (Phase 2). */
+export async function getActiveClubApplications() {
+  return db.clubApplication.findMany({
+    where: { status: { in: ["NOT_OPEN", "OPEN", "APPLYING", "INTERVIEW"] } },
+    include: { club: true },
+    orderBy: { deadlineAt: "asc" },
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Priority candidates → ranked actions
 // ---------------------------------------------------------------------------
@@ -187,17 +196,45 @@ export function buildCandidates(
   return candidates;
 }
 
+/** Club applications as rankable actions ("Submit X application"). */
+export function applicationCandidates(
+  apps: Awaited<ReturnType<typeof getActiveClubApplications>>,
+  now: Date,
+): PriorityCandidate[] {
+  const out: PriorityCandidate[] = [];
+  for (const app of apps) {
+    if (!app.deadlineAt) continue;
+    if (app.status !== "OPEN" && app.status !== "APPLYING") continue;
+    if (daysUntil(app.deadlineAt, now) < 0) continue;
+    out.push({
+      id: app.id,
+      entityType: "TASK",
+      title: `${app.status === "APPLYING" ? "Finish" : "Submit"} ${app.club.name} application`,
+      category: "CLUB",
+      dueAt: app.deadlineAt,
+      estMinutes: 60,
+      importance: 4,
+      status: app.status === "APPLYING" ? "IN_PROGRESS" : "NOT_STARTED",
+    });
+  }
+  return out;
+}
+
 export async function getRankedActions(now = new Date()): Promise<{
   top: RankedAction[];
   all: RankedAction[];
 }> {
-  const [assignments, exams, tasks, { tiers }] = await Promise.all([
+  const [assignments, exams, tasks, apps, { tiers }] = await Promise.all([
     getOpenAssignments(),
     getUpcomingExams(14),
     getOpenTasks(),
+    getActiveClubApplications(),
     getProfile(),
   ]);
-  const candidates = buildCandidates(assignments, exams, tasks, now);
+  const candidates = [
+    ...buildCandidates(assignments, exams, tasks, now),
+    ...applicationCandidates(apps, now),
+  ];
   const ctx = { now, tier1: tiers.tier1, tier2: tiers.tier2 };
   return { top: topActions(candidates, 5, ctx), all: rankActions(candidates, ctx) };
 }
@@ -261,9 +298,23 @@ export async function getWorkloadInputs(
     sessions: sessions
       .filter((s) => !s.completed)
       .map((s) => ({ date: s.date, minutes: s.minutes })),
-    otherDeadlines: events
-      .filter((e) => e.category !== "ACADEMIC" && /deadline|application|due/i.test(e.title + (e.description ?? "")))
-      .map((e) => ({ title: e.title, at: e.startAt })),
+    otherDeadlines: [
+      ...events
+        .filter(
+          (e) =>
+            e.category !== "ACADEMIC" &&
+            /deadline|application|due/i.test(e.title + (e.description ?? "")),
+        )
+        .map((e) => ({ title: e.title, at: e.startAt })),
+      ...(
+        await getActiveClubApplications()
+      )
+        .filter((a) => a.deadlineAt && a.deadlineAt >= now)
+        .map((a) => ({
+          title: `${a.club.name} application deadline`,
+          at: a.deadlineAt as Date,
+        })),
+    ],
   };
 }
 
@@ -272,6 +323,12 @@ export async function getWorkloadInputs(
 // ---------------------------------------------------------------------------
 
 export async function getAlerts(now = new Date()): Promise<AlertItem[]> {
+  const [clubApps, changedSources] = await Promise.all([
+    getActiveClubApplications(),
+    db.monitoredSource.findMany({
+      where: { lastChangeAt: { gte: addDays(now, -7) } },
+    }),
+  ]);
   const [assignments, exams, tasks, conflicts, topics, workloadInputs, dismissed, { profile }] =
     await Promise.all([
       getOpenAssignments(30),
@@ -338,6 +395,22 @@ export async function getAlerts(now = new Date()): Promise<AlertItem[]> {
     })),
     plannedWeekMinutes: plannedWeekMinutes + classWeekMinutes,
     weeklyBudgetMinutes: (profile?.weeklyHours ?? 40) * 60,
+    clubApplications: clubApps.map((a) => ({
+      id: a.id,
+      clubName: a.club.name,
+      status: a.status,
+      opensAt: a.opensAt,
+      deadlineAt: a.deadlineAt,
+      interviewAt: a.interviewAt,
+    })),
+    changedSources: changedSources
+      .filter((s) => s.lastChangeAt)
+      .map((s) => ({
+        id: s.id,
+        label: s.label,
+        changedAt: s.lastChangeAt as Date,
+        summary: s.lastChangeSummary,
+      })),
   });
 
   const dismissedKeys = new Set(dismissed.map((d) => d.alertKey));
@@ -553,6 +626,8 @@ export async function getChatContextPack(now = new Date()) {
     alerts,
     preps,
     goals,
+    clubs,
+    clubApps,
   ] = await Promise.all([
     getProfile(),
     getCurrentSemester(),
@@ -564,6 +639,8 @@ export async function getChatContextPack(now = new Date()) {
     getAlerts(now),
     getClassPreps(now),
     db.goal.findMany({ where: { status: "ACTIVE" } }),
+    db.club.findMany({ orderBy: { name: "asc" } }),
+    getActiveClubApplications(),
   ]);
   const sessions = await getSessionsInRange(now, addDays(now, 7));
   const workload = forecastWorkload(await getWorkloadInputs(now, 14));
@@ -646,6 +723,23 @@ export async function getChatContextPack(now = new Date()) {
       title: g.title,
       tier: g.tier,
       progress: g.progress,
+    })),
+    clubs: clubs.map((c) => ({
+      name: c.name,
+      category: c.category,
+      priority: c.priority,
+      priorityReason: c.priorityReason,
+      membership: c.membership,
+      recruitment: c.recruitment,
+      confidence: c.confidence,
+      lastVerifiedAt: c.lastVerifiedAt,
+    })),
+    clubApplications: clubApps.map((a) => ({
+      club: a.club.name,
+      status: a.status,
+      opensAt: a.opensAt,
+      deadlineAt: a.deadlineAt,
+      interviewAt: a.interviewAt,
     })),
   };
 }

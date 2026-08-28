@@ -207,7 +207,9 @@ export interface AlertItem {
     | "CONFLICT"
     | "OVERCOMMITMENT"
     | "NEEDS_REVIEW"
-    | "UNPLANNED_EXAM";
+    | "UNPLANNED_EXAM"
+    | "APP_OPENS"
+    | "SOURCE_CHANGED";
   severity: "INFO" | "WARNING" | "URGENT";
   title: string;
   body: string;

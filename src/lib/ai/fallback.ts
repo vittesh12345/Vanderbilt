@@ -362,6 +362,36 @@ function categoryAnswer(q: string, pack: ChatContextPack, now: Date): string {
   const events = (pack.upcomingEvents ?? []).filter((e) => cats.has(e.category));
 
   const lines: string[] = [];
+
+  // Phase 2: the club database + application pipeline answer club questions.
+  if (cats.has("CLUB")) {
+    const clubs = pack.clubs ?? [];
+    const apps = pack.clubApplications ?? [];
+    const recruiting = apps.filter((a) =>
+      ["NOT_OPEN", "OPEN", "APPLYING"].includes(a.status),
+    );
+    if (recruiting.length) {
+      lines.push("Club applications in play:");
+      for (const a of recruiting.slice(0, 5)) {
+        const d = toDate(a.deadlineAt);
+        lines.push(
+          `- ${a.club} — ${a.status.replace(/_/g, " ").toLowerCase()}${d ? `, ${dueLabel(d, now)}` : ""}`,
+        );
+      }
+    }
+    const high = clubs.filter((c) => c.priority === "HIGH" && !["MEMBER", "LEADER"].includes(c.membership));
+    if (high.length) {
+      lines.push("High-priority clubs to pursue:");
+      for (const c of high.slice(0, 4)) {
+        lines.push(`- ${c.name}${c.priorityReason ? ` — ${c.priorityReason}` : ""}`);
+      }
+    } else if (clubs.length && matched.includes("CLUB")) {
+      lines.push(
+        `Tracking ${clubs.length} clubs — see /clubs for the ranked list (rankings are computed against your interests there).`,
+      );
+    }
+  }
+
   if (tasks.length) {
     lines.push("Open tasks:");
     for (const t of tasks.slice(0, 5)) {
@@ -387,7 +417,7 @@ function categoryAnswer(q: string, pack: ChatContextPack, now: Date): string {
   }
   lines.push(
     "",
-    "Deeper club, career, research, and startup intelligence (recruiting timelines, lab matching, funding programs) arrives in Phases 2–5 — for now I track your own tasks, events, and goals in those areas.",
+    "Club intelligence is live on /clubs (rankings, applications, watched pages). Deeper career, research, and startup intelligence arrives in Phases 3–5.",
   );
   return lines.join("\n");
 }

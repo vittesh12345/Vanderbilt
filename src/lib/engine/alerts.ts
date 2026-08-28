@@ -30,6 +30,22 @@ export interface AlertInputs {
   openConflicts: { id: string; description: string; suggestion: string | null }[];
   heavyWeeks: HeavyWeek[];
   needsReviewTopics: { id: string; name: string; courseCode: string }[];
+  /** Club applications with open/deadline dates (Phase 2). */
+  clubApplications?: {
+    id: string;
+    clubName: string;
+    status: string; // NOT_OPEN | OPEN | APPLYING | SUBMITTED | INTERVIEW | ...
+    opensAt: Date | null;
+    deadlineAt: Date | null;
+    interviewAt: Date | null;
+  }[];
+  /** Monitored sources that changed recently (Phase 2 web monitoring). */
+  changedSources?: {
+    id: string;
+    label: string;
+    changedAt: Date;
+    summary: string | null;
+  }[];
   /** Planned minutes this week vs. the profile's weekly budget. */
   plannedWeekMinutes?: number;
   weeklyBudgetMinutes?: number;
@@ -114,6 +130,66 @@ export function computeAlerts(inputs: AlertInputs): AlertItem[] {
         at: e.startAt,
       });
     }
+  }
+
+  // Club applications: opening soon, deadline tiers, interview prep.
+  const APP_ACTIVE = new Set(["NOT_OPEN", "OPEN", "APPLYING"]);
+  for (const app of inputs.clubApplications ?? []) {
+    if (app.opensAt && app.status === "NOT_OPEN") {
+      const days = daysUntil(app.opensAt, now);
+      if (days >= 0 && days <= 7) {
+        alerts.push({
+          key: `APP_OPENS:${app.id}:${todayBucket}`,
+          kind: "APP_OPENS",
+          severity: "INFO",
+          title: `${app.clubName} application opens ${days === 0 ? "today" : `in ${days} day${days === 1 ? "" : "s"}`}`,
+          body: "Draft your materials before it opens.",
+          href: "/clubs",
+          at: app.opensAt,
+        });
+      }
+    }
+    if (app.deadlineAt && APP_ACTIVE.has(app.status)) {
+      const tier = deadlineTier(daysUntil(app.deadlineAt, now));
+      if (tier) {
+        alerts.push({
+          key: `${tier.kind}:club-app:${app.id}:${todayBucket}`,
+          kind: tier.kind,
+          severity: tier.severity,
+          title: `${app.clubName} application`,
+          body: `${tier.hint} (club application)`,
+          href: "/clubs",
+          at: app.deadlineAt,
+        });
+      }
+    }
+    if (app.interviewAt && app.status === "INTERVIEW") {
+      const days = daysUntil(app.interviewAt, now);
+      if (days >= 0 && days <= 4) {
+        alerts.push({
+          key: `DEADLINE_3D:club-interview:${app.id}:${todayBucket}`,
+          kind: "DEADLINE_3D",
+          severity: days <= 1 ? "URGENT" : "WARNING",
+          title: `${app.clubName} interview ${days === 0 ? "today" : `in ${days} day${days === 1 ? "" : "s"}`}`,
+          body: "Prepare interview answers.",
+          href: "/clubs",
+          at: app.interviewAt,
+        });
+      }
+    }
+  }
+
+  // Web monitoring: a watched page meaningfully changed.
+  for (const src of inputs.changedSources ?? []) {
+    alerts.push({
+      key: `SOURCE_CHANGED:${src.id}:${bucket(src.changedAt)}`,
+      kind: "SOURCE_CHANGED",
+      severity: "INFO",
+      title: `Watched page changed: ${src.label}`,
+      body: src.summary ?? "Content changed since the last check — review it.",
+      href: "/settings",
+      at: src.changedAt,
+    });
   }
 
   for (const w of inputs.heavyWeeks) {

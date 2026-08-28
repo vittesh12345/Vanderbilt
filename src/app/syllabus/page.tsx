@@ -9,6 +9,7 @@ import { parseJson } from "@/lib/json";
 import { fmtDay } from "@/lib/dates";
 import { Card, CourseDot, EmptyState, PageHeader } from "@/components/ui";
 import SyllabusIntake, { ConflictCard } from "@/components/SyllabusIntake";
+import IcsIngest from "@/components/IcsIngest";
 
 export const dynamic = "force-dynamic";
 
@@ -97,6 +98,17 @@ export default async function SyllabusPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <SyllabusIntake courses={courseOptions} />
+
+          <Card title="Brightspace / VSTAR calendar feed" className="mt-6">
+            <p className="mb-3 text-xs text-[var(--text-secondary)]">
+              Brightspace exposes a personal iCal subscription URL (Calendar
+              &rarr; Settings &rarr; &quot;Enable Calendar Feeds&quot;). Paste it — or the
+              .ics contents — and due dates, quizzes, and exams flow into the
+              same review-and-commit pipeline. Legitimate access only: the feed
+              URL is yours, no credentials are stored.
+            </p>
+            <IcsIngest />
+          </Card>
         </div>
 
         <div className="space-y-6">

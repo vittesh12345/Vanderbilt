@@ -37,18 +37,25 @@ additive, never rewrites.
 - [x] Personal priority tiers + weekly-hours budget (overcommitment guard)
 - [x] Engine unit-test suite (vitest)
 
-## Phase 2 — Vanderbilt Intelligence (schema ready)
+## Phase 2 — Vanderbilt Intelligence ✅
 
-Tables in place: `Club`, `ClubApplication`, `MonitoredSource`.
-- [ ] Club database + recommendation engine ranked against profile goals
-      (HIGH/MEDIUM/LOW with WHY)
-- [ ] Application tracker (NOT_OPEN → … → ACCEPTED/REJECTED) with open/deadline
-      reminders through the existing alert engine
-- [ ] Web monitoring loop (docs/ARCHITECTURE.md § Web monitoring): AnchorLink,
-      club sites/socials, VU calendars; meaningful-change notifications only
-- [ ] Meeting-time verification with conflict flagging ("site says Tue,
-      Instagram says Wed")
-- [ ] Brightspace iCal feed adapter (first automated academic source)
+- [x] Club database seeded with 28 real Vanderbilt organizations researched
+      from official sources (AnchorLink, club sites), every record carrying
+      source URL, confidence (VERIFIED/LIKELY/UNVERIFIED), and last-verified
+      date — plus 8 Wond'ry/startup programs pre-loaded into the Phase 5 table
+- [x] Recommendation engine: HIGH/MEDIUM/LOW ranked against interests,
+      priority tiers, and active goals — always with the WHY
+- [x] Application tracker (NOT_OPEN → … → ACCEPTED/REJECTED) wired into the
+      alert engine ("opens in 5 days", deadline tiers, interview prep), the
+      workload forecast, and the Top-5 action ranking
+- [x] Web monitoring loop: MonitoredSource rows (18 seeded recruitment/program
+      pages), hash-diff checker with meaningful-change summaries, runnable via
+      `npm run monitor` (cron) or the Settings panel; changes surface as alerts
+- [x] Brightspace iCal feed adapter: paste the personal calendar-feed URL or
+      .ics contents → classified candidates matched to courses → review →
+      commit (the first automated academic source)
+- [ ] Meeting-time cross-source verification (conflict rows exist; automated
+      social-page comparison lands with richer monitoring)
 
 ## Phase 3 — Career OS (schema ready)
 

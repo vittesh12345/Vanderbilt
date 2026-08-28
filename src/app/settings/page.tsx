@@ -7,6 +7,7 @@ import { parseJson } from "@/lib/json";
 import { getCurrentSemester, getProfile } from "@/lib/data/queries";
 import { Card, PageHeader, Stat } from "@/components/ui";
 import ProfileForm from "@/components/ProfileForm";
+import MonitorPanel, { type SourceRow } from "@/components/MonitorPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,7 @@ export default async function SettingsPage() {
     goalCount,
     taskCount,
     openConflictCount,
+    monitoredSources,
   ] = await Promise.all([
     getProfile(),
     getCurrentSemester(),
@@ -61,7 +63,20 @@ export default async function SettingsPage() {
     db.goal.count(),
     db.task.count(),
     db.conflict.count({ where: { status: "OPEN" } }),
+    db.monitoredSource.findMany({ orderBy: { label: "asc" } }),
   ]);
+
+  const sourceRows: SourceRow[] = monitoredSources.map((m) => ({
+    id: m.id,
+    url: m.url,
+    label: m.label,
+    kind: m.kind,
+    active: m.active,
+    checkEveryHours: m.checkEveryHours,
+    lastCheckedAt: m.lastCheckedAt?.toISOString() ?? null,
+    lastChangeAt: m.lastChangeAt?.toISOString() ?? null,
+    lastChangeSummary: m.lastChangeSummary,
+  }));
 
   const aiOn = Boolean(process.env.ANTHROPIC_API_KEY);
 
@@ -208,6 +223,16 @@ export default async function SettingsPage() {
                 </div>
               )}
             </div>
+          </Card>
+
+          <Card title="Web monitoring">
+            <p className="mb-3 text-xs text-[var(--text-secondary)]">
+              Watched pages (club recruitment, Wond&apos;ry programs, calendars) are
+              checked on their interval; only meaningful changes surface as
+              alerts. Deploy with a daily cron hitting
+              <code className="mx-1">POST /api/monitor/run</code>.
+            </p>
+            <MonitorPanel sources={sourceRows} />
           </Card>
 
           <Card title="Integrations roadmap">
