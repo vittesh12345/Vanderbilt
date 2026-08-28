@@ -101,7 +101,8 @@ export function detectHeavyWeeks(inputs: WorkloadInputs): HeavyWeek[] {
   for (let start = 0; start <= horizon - 7; start++) {
     const s = addDays(now, start);
     const e = addDays(s, 6);
-    const inWindow = (d: Date) => d >= s && d <= addDays(e, 1);
+    // Inclusive of the whole 7th day (e is midnight), exclusive after that.
+    const inWindow = (d: Date) => d >= s && d < addDays(e, 1);
 
     const assignments = inputs.assignments.filter((a) => inWindow(a.dueAt));
     const exams = inputs.exams.filter(

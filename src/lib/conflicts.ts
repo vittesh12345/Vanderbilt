@@ -33,6 +33,13 @@ function normTitle(t: string): string {
   return t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
+/** ExtractedDate.date may be YYYY-MM-DD or a full ISO datetime. */
+function toDate(date: string, fallbackTime: string): Date {
+  return date.includes("T")
+    ? new Date(date)
+    : new Date(`${date}T${fallbackTime}:00`);
+}
+
 /** Loose title match: exact normalized, or one contains the other. */
 function titlesMatch(a: string, b: string): boolean {
   const na = normTitle(a);
@@ -51,7 +58,7 @@ export function detectConflicts(
   // Exam/quiz date disagreements.
   for (const d of extraction.dates) {
     if (d.kind !== "EXAM" && d.kind !== "QUIZ") continue;
-    const incoming = new Date(`${d.date}T${d.time ?? "09:00"}:00`);
+    const incoming = toDate(d.date, d.time ?? "09:00");
     if (isNaN(incoming.getTime())) continue;
     for (const exam of existing.exams) {
       if (!titlesMatch(d.title, `${exam.title}`) && !titlesMatch(d.title, `${exam.kind}`))
@@ -63,7 +70,7 @@ export function detectConflicts(
           field: "startAt",
           description: `${existing.course.code} "${exam.title}" date differs between sources`,
           sourceA: sourceLabel,
-          valueA: d.date,
+          valueA: d.date.slice(0, 10),
           sourceB: exam.source === "MANUAL" ? "Existing record" : `Existing record (${exam.source})`,
           valueB: exam.startAt.toISOString().slice(0, 10),
           suggestion: "Verify with professor.",
@@ -75,7 +82,7 @@ export function detectConflicts(
   // Assignment due-date disagreements.
   for (const d of extraction.dates) {
     if (d.kind !== "ASSIGNMENT" && d.kind !== "PROJECT_MILESTONE") continue;
-    const incoming = new Date(`${d.date}T${d.time ?? "23:59"}:00`);
+    const incoming = toDate(d.date, d.time ?? "23:59");
     if (isNaN(incoming.getTime())) continue;
     for (const a of existing.assignments) {
       if (!a.dueAt || !titlesMatch(d.title, a.title)) continue;
@@ -86,7 +93,7 @@ export function detectConflicts(
           field: "dueAt",
           description: `${existing.course.code} "${a.title}" due date differs between sources`,
           sourceA: sourceLabel,
-          valueA: d.date,
+          valueA: d.date.slice(0, 10),
           sourceB: a.source === "MANUAL" ? "Existing record" : `Existing record (${a.source})`,
           valueB: a.dueAt.toISOString().slice(0, 10),
           suggestion: "Verify with professor.",

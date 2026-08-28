@@ -24,10 +24,10 @@ const NUMERIC_DATE_RE = /\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/g;
 const TIME_RE = /\b(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)\b/i;
 const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.]+/;
 const COURSE_CODE_RE = /\b([A-Z]{2,4})\s?-?\s?(\d{3,4}[A-Za-z]?)\b/;
-const PERCENT_AFTER_RE = /([A-Za-z][A-Za-z /&()'-]{2,40}?)\s*[:–—-]\s*(\d{1,3})\s*%/g;
-const PERCENT_BEFORE_RE = /(\d{1,3})\s*%\s*[:–—-]?\s*([A-Za-z][A-Za-z /&()'-]{2,40})/g;
+const PERCENT_AFTER_RE = /([A-Za-z][A-Za-z0-9 /&()'-]{2,40}?)\s*[:–—-]\s*(\d{1,3})\s*%/g;
+const PERCENT_BEFORE_RE = /(\d{1,3})\s*%\s*[:–—-]?\s*([A-Za-z][A-Za-z0-9 /&()'-]{2,40})/g;
 const OFFICE_DAYTIME_RE =
-  /\b(Mon(?:day)?s?|Tue(?:s(?:day)?)?s?|Wed(?:nesday)?s?|Thu(?:rs(?:day)?)?s?|Fri(?:day)?s?|MWF|MW|TR|TTh|T\/Th)\b[^.\n]{0,40}?(\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)?)\s*[–—-]\s*(\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?))/i;
+  /\b(Mon(?:day)?s?|Tue(?:s(?:day)?)?s?|Wed(?:nesday)?s?|Thu(?:rs(?:day)?)?s?|Fri(?:day)?s?|MWF|MW|TR|TTh|T\/Th)\b[^.\n]{0,40}?(\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)?)\s*[–—-]\s*(\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)?)/i;
 
 export interface ParseOptions {
   /** Year to assume for dates with no explicit year (default: current year). */
@@ -76,7 +76,7 @@ function classifyLine(line: string): {
   if (/\bfinal\s+exam\b|\bfinal\b(?=.*\bexam)/.test(l) || /\bfinal exam\b/.test(l))
     return { kind: "EXAM", confidence: "HIGH", strong: true };
   if (/\b(midterm|exam|test)\b/.test(l))
-    return { kind: "EXAM", confidence: hasDue ? "HIGH" : "HIGH", strong: true };
+    return { kind: "EXAM", confidence: "HIGH", strong: true };
   if (/\bquiz(?:zes)?\b/.test(l))
     return { kind: "QUIZ", confidence: "HIGH", strong: true };
   if (/\b(milestone|proposal|draft|presentation|demo)\b/.test(l))
@@ -90,15 +90,19 @@ function classifyLine(line: string): {
 }
 
 function titleFromLine(line: string): string {
-  // Strip leading list markers, dates, and trailing separators to get a title.
+  // Strip leading list markers, dates, times, and connective residue
+  // ("due", "at 11:59 PM", trailing "by") to get a clean title.
   let t = line
     .replace(MONTH_DATE_RE, "")
     .replace(NUMERIC_DATE_RE, "")
+    .replace(/\b(?:at\s+)?\d{1,2}(?::\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)\b/gi, "")
     .replace(/\b(due|deadline)\b:?/gi, "")
+    .replace(/\b(?:by|at|on)\s*$/i, "")
     .replace(/^[\s\d.)\-–—•*|]+/, "")
-    .replace(/[\s:\-–—•|]+$/, "")
+    .replace(/[\s:,\-–—•|]+$/, "")
     .replace(/\s{2,}/g, " ")
-    .trim();
+    .trim()
+    .replace(/[\s:,\-–—•|]+$/, "");
   if (t.length > 80) t = t.slice(0, 77) + "…";
   return t || "Untitled item";
 }

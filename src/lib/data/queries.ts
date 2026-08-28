@@ -32,11 +32,13 @@ const OPEN_STATUSES = ["NOT_STARTED", "IN_PROGRESS", "BLOCKED"];
 
 export async function getProfile() {
   const profile = await db.profile.findFirst();
-  const tiers = parseJson<PriorityTiers>(profile?.tiersJson ?? "{}", {
-    tier1: [],
-    tier2: [],
-    tier3: [],
-  });
+  // Merge with defaults: a stored "{}" must still yield arrays for every tier.
+  const parsed = parseJson<Partial<PriorityTiers>>(profile?.tiersJson ?? "{}", {});
+  const tiers: PriorityTiers = {
+    tier1: parsed.tier1 ?? [],
+    tier2: parsed.tier2 ?? [],
+    tier3: parsed.tier3 ?? [],
+  };
   return { profile, tiers };
 }
 
@@ -61,9 +63,11 @@ export async function getCourses() {
 }
 
 export async function getOpenAssignments(horizonDays?: number) {
+  const semester = await getCurrentSemester();
   return db.assignment.findMany({
     where: {
       status: { in: OPEN_STATUSES },
+      ...(semester ? { course: { semesterId: semester.id } } : {}),
       ...(horizonDays
         ? { dueAt: { lte: addDays(new Date(), horizonDays) } }
         : {}),
@@ -75,9 +79,11 @@ export async function getOpenAssignments(horizonDays?: number) {
 
 export async function getUpcomingExams(horizonDays = 60) {
   const now = new Date();
+  const semester = await getCurrentSemester();
   return db.exam.findMany({
     where: {
       startAt: { gte: startOfDay(now), lte: addDays(now, horizonDays) },
+      ...(semester ? { course: { semesterId: semester.id } } : {}),
     },
     include: { course: true },
     orderBy: { startAt: "asc" },
@@ -120,17 +126,15 @@ export function buildCandidates(
   tasks: TaskRow[],
   now: Date,
 ): PriorityCandidate[] {
-  const completedIds = new Set(
-    assignments.filter((a) => !OPEN_STATUSES.includes(a.status)).map((a) => a.id),
-  );
+  // `assignments` holds only OPEN work, so a dependency id that still appears
+  // in the list is unfinished; one that doesn't is completed or deleted —
+  // either way it no longer blocks.
+  const openIds = new Set(assignments.map((a) => a.id));
 
   const candidates: PriorityCandidate[] = assignments.map((a) => {
     const deps = parseJson<string[]>(a.dependsOnJson, []);
     const dependenciesMet =
-      deps.length === 0 ||
-      deps.every(
-        (id) => completedIds.has(id) || !assignments.some((x) => x.id === id),
-      );
+      deps.length === 0 || deps.every((id) => !openIds.has(id));
     return {
       id: a.id,
       entityType: "ASSIGNMENT" as const,
@@ -399,7 +403,11 @@ export async function getUnifiedCalendar(
   ]);
   const [assignments, exams, sessions] = await Promise.all([
     db.assignment.findMany({
-      where: { dueAt: { gte: rangeStart, lte: rangeEnd } },
+      // Completed/submitted work no longer renders as a "due" chip.
+      where: {
+        dueAt: { gte: rangeStart, lte: rangeEnd },
+        status: { notIn: ["COMPLETED", "SUBMITTED"] },
+      },
       include: { course: true },
     }),
     db.exam.findMany({
