@@ -3,35 +3,13 @@
 // meetings + serialized JSON detail arrays.
 
 import { NextRequest, NextResponse } from "next/server";
-import { addDays } from "date-fns";
 import { db } from "@/lib/db";
 import { toJson } from "@/lib/json";
 import { parseHM } from "@/lib/dates";
 import { nextCourseColor } from "@/lib/palette";
+import { findOrCreateCurrentSemester } from "@/lib/semester";
 
 const MEETING_KINDS = ["LECTURE", "LAB", "DISCUSSION", "SEMINAR"];
-
-function semesterNameFor(d: Date): string {
-  const m = d.getMonth();
-  const term = m <= 4 ? "Spring" : m <= 6 ? "Summer" : "Fall";
-  return `${term} ${d.getFullYear()}`;
-}
-
-async function findOrCreateCurrentSemester() {
-  const current =
-    (await db.semester.findFirst({ where: { isCurrent: true } })) ??
-    (await db.semester.findFirst({ orderBy: { startDate: "desc" } }));
-  if (current) return current;
-  const now = new Date();
-  return db.semester.create({
-    data: {
-      name: semesterNameFor(now),
-      startDate: addDays(now, -30),
-      endDate: addDays(now, 120),
-      isCurrent: true,
-    },
-  });
-}
 
 interface MeetingInput {
   dayOfWeek: number;

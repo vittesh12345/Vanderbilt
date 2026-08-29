@@ -38,6 +38,10 @@ confirm things, complete things, and make decisions.
 - **Ask College OS** — a chat that answers from *your actual data* ("What
   should I do if I only have 2 hours tonight?"), with a full heuristic
   fallback when no API key is configured
+- **Getting your real schedule in** — paste your YES class schedule on
+  **Syllabus Intelligence** and it becomes courses, meeting days, times, rooms,
+  instructors, and credit hours in one step, with every row reviewable first.
+  College OS never logs into YES: you sign in, you copy, you paste.
 
 **Phase 2 (Vanderbilt Intelligence) is also live**: a club database seeded
 with 28 real Vanderbilt organizations (researched from official sources, each

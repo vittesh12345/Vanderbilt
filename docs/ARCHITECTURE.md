@@ -93,6 +93,32 @@ review UI (include/exclude/edit each item; conflicts previewed) → commit
 (assignments/exams created with auto-estimates; course profile updated;
 `Conflict` rows written).
 
+### Implemented adapter: YES / VSTAR schedule paste
+
+YES ("Your Enrollment Services") is behind Vanderbilt SSO and Duo. College OS
+does not log in — the student does, copies their own class schedule, and pastes
+it. `src/lib/parsers/schedule.ts` is a pure parser over that text: it splits the
+paste into one block per course code, expands day clusters (`MWF`, `TR`, `TuTh`,
+`Monday, Wednesday`) into one meeting per day, resolves 12-hour times (including
+the "11:00 - 1:15 pm" case, where inheriting the end's meridiem would put the
+start after the end), and pulls section, room, instructor, and credit hours out
+of whichever layout YES produced — table, printable list, or cart card.
+
+Two guards keep the parse honest rather than confident:
+
+- A course code only opens a block when it precedes the line's meeting time and
+  the line is not a labelled field, so `Room: FGH 1034` and a room number
+  trailing a time never become courses.
+- Every guessed AM/PM is recorded on the meeting (`inferredMeridiem`), surfaced
+  in the review UI, and drops the course's confidence to `LIKELY`.
+
+Commit follows the pipeline's rules: meetings are replaced wholesale (the
+registrar is authoritative for when a class meets, and a stale meeting puts a
+phantom class on the calendar), while scalar fields already on file are never
+overwritten — a disagreement raises a `Conflict` row instead. A paste for a term
+the app hasn't seen offers to start a new semester rather than mixing terms.
+Courses already on file but absent from the paste are *reported*, never deleted.
+
 ### Designed adapter: Brightspace / VSTAR Learn
 
 Brightspace is authenticated; College OS **never** scrapes credentials or

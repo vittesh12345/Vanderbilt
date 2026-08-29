@@ -10,6 +10,7 @@ import { fmtDay } from "@/lib/dates";
 import { Card, CourseDot, EmptyState, PageHeader } from "@/components/ui";
 import SyllabusIntake, { ConflictCard } from "@/components/SyllabusIntake";
 import IcsIngest from "@/components/IcsIngest";
+import ScheduleIntake from "@/components/ScheduleIntake";
 
 export const dynamic = "force-dynamic";
 
@@ -97,7 +98,21 @@ export default async function SyllabusPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <SyllabusIntake courses={courseOptions} />
+          <Card title="Class schedule from YES">
+            <p className="mb-3 text-xs text-[var(--text-secondary)]">
+              Open YES, go to your class schedule, select the table (or the
+              printable class list) and paste it below. Courses, meeting days,
+              times, rooms, instructors, and credit hours come across in one
+              step — you review every row before anything is saved. Nothing
+              here logs into YES or touches your credentials: the text is
+              yours, from a session you signed into yourself.
+            </p>
+            <ScheduleIntake />
+          </Card>
+
+          <div className="mt-6">
+            <SyllabusIntake courses={courseOptions} />
+          </div>
 
           <Card title="Brightspace / VSTAR calendar feed" className="mt-6">
             <p className="mb-3 text-xs text-[var(--text-secondary)]">
