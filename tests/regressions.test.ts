@@ -6,6 +6,7 @@ import { dueLabel, parseDateInput } from "@/lib/dates";
 import { buildStudyPlan, recommendedPrepMinutes } from "@/lib/engine/studyplan";
 import { detectHeavyWeeks } from "@/lib/engine/workload";
 import { parseSyllabus } from "@/lib/parsers/syllabus";
+import { scoreCandidate } from "@/lib/engine/priority";
 
 const NOW = new Date("2026-09-14T09:00:00");
 
@@ -126,5 +127,34 @@ describe("syllabus parser regressions", () => {
     expect(e.warnings.some((w) => w.includes("sum"))).toBe(false);
     expect(e.officeHours).toHaveLength(1);
     expect(e.officeHours[0].end).toBe("3:30");
+  });
+});
+
+// The ranking claim in the docs and the settings page must stay TRUE.
+// It was previously written as "a 5-hour project due next week outranks a
+// 15-minute reading due tomorrow" — which the engine does not do: at seven
+// days out the pace term (requiredDaily/6) is too small to beat the urgency
+// tier. Pin both the case that holds and the case that does not, so nobody
+// re-inflates the claim.
+describe("priority: the documented pace example is accurate", () => {
+  const now = new Date("2026-09-01T09:00:00");
+  const at = (n: number) => new Date(now.getTime() + n * 864e5);
+  const mk = (dueIn: number, estMinutes: number, gradeWeight: number) =>
+    scoreCandidate(
+      { id: "x", entityType: "ASSIGNMENT" as const, title: "t", dueAt: at(dueIn), estMinutes, gradeWeight },
+      { now },
+    );
+
+  it("ranks an 8-hour project due in 3 days above a 15-minute reading due tomorrow", () => {
+    expect(mk(3, 480, 20).score).toBeGreaterThan(mk(1, 15, 2).score);
+    expect(mk(3, 480, 20).priority).toBe("CRITICAL");
+  });
+
+  it("does NOT claim a 5-hour project due in a week beats that reading", () => {
+    expect(mk(7, 300, 15).score).toBeLessThan(mk(1, 15, 2).score);
+  });
+
+  it("still credits pace in the reason when daily hours are required", () => {
+    expect(mk(3, 480, 20).reason).toMatch(/\/day/);
   });
 });

@@ -42,6 +42,10 @@ confirm things, complete things, and make decisions.
   **Syllabus Intelligence** and it becomes courses, meeting days, times, rooms,
   instructors, and credit hours in one step, with every row reviewable first.
   College OS never logs into YES: you sign in, you copy, you paste.
+- **A live page for your phone** — `artifact/` builds the Now/Week/Work core
+  into a single self-contained page that runs as a published Artifact and keeps
+  its own data, no server involved. Same parser, same priority engine. See
+  `artifact/README.md`.
 
 **Phase 2 (Vanderbilt Intelligence) is also live**: a club database seeded
 with 28 real Vanderbilt organizations (researched from official sources, each

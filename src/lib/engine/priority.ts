@@ -2,10 +2,15 @@
 //
 // Ranks every open piece of work — assignments, exam prep, generic tasks —
 // into a single ordered action list with a human-readable reason per item.
-// Deliberately NOT a due-date sort: a 5-hour project due next week can
-// outrank a 15-minute worksheet due tomorrow, because score includes the
-// *required daily pace* to finish on time, grade weight, importance,
-// difficulty (hard things reward early starts), and personal priority tiers.
+// Deliberately NOT a due-date sort: score includes the *required daily
+// pace* to finish on time, grade weight, importance, difficulty (hard things
+// reward early starts), and personal priority tiers. So an 8-hour project due
+// in 3 days (60.7) outranks a 15-minute reading due tomorrow (37.7) — the
+// pace term is what carries it past the nearer deadline. Note the honest
+// limit: at a week out the pace term is small (requiredDaily/6), so a 5-hour
+// project due in 7 days scores 24.1 and does NOT outrank that reading. Work
+// only climbs the list once finishing it on time actually demands daily
+// hours.
 
 import { daysUntil, fmtMinutes } from "@/lib/dates";
 import type { RankedAction } from "@/lib/types";

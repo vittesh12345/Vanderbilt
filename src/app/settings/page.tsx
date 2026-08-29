@@ -121,8 +121,8 @@ export default async function SettingsPage() {
                 The priority engine scores every open piece of work —
                 assignments, exam prep, and tasks — and ranks them into your
                 daily Top 5. A score is <em>not</em> a due-date sort: it adds
-                up urgency, the daily pace required to finish on time (so a
-                5-hour project due next week can outrank a 15-minute worksheet
+                up urgency, the daily pace required to finish on time (so an
+                8-hour project due in 3 days outranks a 15-minute worksheet
                 due tomorrow), grade weight, importance, and difficulty (hard
                 material rewards early starts).
               </p>
