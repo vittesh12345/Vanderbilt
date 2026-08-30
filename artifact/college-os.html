@@ -93,7 +93,8 @@ a{color:var(--gold)}
 .act[data-p="MEDIUM"]{border-left-color:var(--gold-soft)}
 .act .rank{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--muted);padding-top:2px;min-width:14px}
 .act .ttl{font-weight:600;line-height:1.3}
-.act .why{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+.why{font-size:12.5px;color:var(--muted);line-height:1.45}
+.act .why{margin-top:3px}
 .act.done .ttl{text-decoration:line-through;color:var(--muted)}
 
 .chip{
@@ -158,7 +159,7 @@ textarea.in{min-height:150px;font-family:var(--mono);font-size:12.5px;line-heigh
   padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));
 }
 .tab{
-  flex:1;max-width:150px;border:0;background:none;cursor:pointer;border-radius:10px;
+  flex:1;max-width:120px;border:0;background:none;cursor:pointer;border-radius:10px;
   padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);
 }
 .tab span{font-size:10.5px;font-weight:600;letter-spacing:.02em}
@@ -497,6 +498,17 @@ function extractProfessor(block) {
         return null;
     if (!/[A-Za-z]/.test(name))
         return null;
+    // YES pages put enrollment prose next to the word "instructor" —
+    // "consent of instructor and DUS after first day of class, 8/26/2026".
+    // A person's name has no digits, does not open with a lowercase
+    // connective, and is not a sentence. Anything else is not a name.
+    if (/\d/.test(name))
+        return null;
+    if (/^(?:and|or|of|the|for|with|from|by|to|is|are|no|not|see|consent|permission)\b/i.test(name)) {
+        return null;
+    }
+    if (name.split(/\s+/).length > 6)
+        return null;
     return name.slice(0, 60);
 }
 /** A leftover cell that reads like a person's name rather than a room. */
@@ -701,6 +713,17 @@ function countCourseCodes(text) {
     return found.size;
 }
 
+  /* ======================= researched campus catalog ====================
+     Clubs, Wond'ry programs and research labs gathered from official
+     Vanderbilt sources, each carrying its source URL and an honest
+     confidence: VERIFIED = the official page was read directly, LIKELY =
+     official-domain search snippet, UNVERIFIED = secondary. Reference data,
+     identical for every viewer, so it lives in the page rather than in the
+     saved state. Deadlines are as researched on the date below — the UI says
+     to confirm them on the source before relying on one.
+     ===================================================================== */
+  var CATALOG = {"verifiedAt":"2026-08-28","clubs":[{"n":"Vanderbilt Investment Club (VIC)","c":"FINANCE","d":"Undergraduate club actively managing a long-only, value-oriented equity fund seeded by the Vanderbilt endowment. 50+ students across 15+ majors work on industry coverage teams and a…","u":"https://www.vuinvestmentclub.com/","s":"https://www.vuinvestmentclub.com/","cf":"LIKELY","a":"Per site snippets: recruitment starts with information/education sessions covering the club's mission and key accounting and valuation concepts, then a stock pitch case study and a final interview; analysts…"},{"n":"Vanderbilt Investment Banking Club (VIBC)","c":"FINANCE","d":"Selective ten-week training program preparing Vanderbilt underclassmen for investment banking recruiting: hands-on DCF, LBO, and merger modeling, pitch decks and company analysis, live…","u":"https://www.vanderbiltibc.org/","s":"https://www.vanderbiltibc.org/","cf":"LIKELY","a":"Per site snippets: Fall 2026 applications close September 14, 2026 at 11:59 PM CT, submitted via vanderbiltibc.org; program requires 4-6 hours/week and includes 10+ graded deliverables.","dl":"2026-09-14"},{"n":"Commodore Capital Group (CCG)","c":"VC_PE","d":"Vanderbilt's undergraduate private markets organization, self-described as the premier group for students interested in private financial markets. Built on three pillars — Education,…","u":"https://vanderbiltccg.com/","s":"https://vanderbiltccg.com/","cf":"LIKELY","a":"Per site snippets: application information at vanderbiltccg.com/apply-now; recruits primarily freshmen and sophomores interested in high-finance roles (PE, IB, hedge funds, private credit)."},{"n":"Vanderbilt Finance Club (VFC)","c":"FINANCE","d":"Registered undergraduate finance organization on Vanderbilt's AnchorLink platform (org slug 'vfc'), which also lists its general meetings (e.g., 'Vanderbilt Finance Club Meeting #1'). A…","u":"https://anchorlink.vanderbilt.edu/organization/vfc","s":"https://anchorlink.vanderbilt.edu/organization/vfc","cf":"LIKELY"},{"n":"Vanderbilt Financial Modeling Club","c":"FINANCE","d":"Student club running a 10-week Excel-based financial modeling curriculum: 3-Statement Models, Public Comparables, Precedent Transactions, Unlevered DCF, Merger Models, LBO Models, and…","u":"https://www.linkedin.com/company/vanderbilt-financial-modeling-club","s":"https://www.linkedin.com/company/vanderbilt-financial-modeling-club","cf":"UNVERIFIED"},{"n":"Owen Finance Club (OFC)","c":"FINANCE","d":"Finance club at Vanderbilt's Owen Graduate School of Management providing a forum for students to pursue finance-related interests, including education and training, career development, and…","u":"https://anchorlink.vanderbilt.edu/organization/owenfinanceclub","s":"https://business.vanderbilt.edu/about/student-life/clubs-organizations/","cf":"LIKELY"},{"n":"Vanderbilt Women in Business (WiB)","c":"BUSINESS","d":"Founded in spring 2015 by six undergraduate women to counter Vanderbilt's homogenous business community; dedicated to uplifting women and historically marginalized identities in business.…","u":"https://www.vanderbiltwib.org/","s":"https://www.vanderbiltwib.org/","cf":"LIKELY","a":"Recruitment page exists at vanderbiltwib.org/recruitment; process details were not captured in accessible snippets."},{"n":"Vanderbilt Undergraduate Consulting Club (VUCC)","c":"CONSULTING","d":"Vanderbilt's largest consulting student organization, serving 600+ members, dedicated to equipping undergraduates pursuing consulting careers and making the field accessible to all…","u":"https://www.vanderbiltconsulting.club/","s":"https://www.vanderbiltconsulting.club/apply-contact-us","cf":"LIKELY","a":"Recruits on a cycle; if you missed the initial recruitment timeline, the Apply & Contact Us page has a form to join during the year or be notified of the next recruitment cycle."},{"n":"180 Degrees Consulting at Vanderbilt","c":"CONSULTING","d":"Vanderbilt branch (founded January 2024) of the global 180 Degrees Consulting network (170+ branches, 35+ countries). Student-led teams deliver pro-bono consulting to nonprofits and social…","u":"https://www.180dcvanderbilt.com/","s":"https://www.180dcvanderbilt.com/recruitment","cf":"LIKELY","a":"Three-part recruitment (per official recruitment page): written application (resume drop, short answers, video response), a collaborative assessment (group case-style problem-solving exercise), and a…"},{"n":"Students Consulting for Nonprofit Organizations (SCNO)","c":"CONSULTING","d":"Vanderbilt chapter (established 2009) providing professional pro-bono consulting to Nashville nonprofits and social enterprises; has served 40+ organizations. Members join teams of five or…","u":"https://www.vanderbiltscno.com/","s":"https://my.vanderbilt.edu/vandyscno/about-us/","cf":"LIKELY","a":"Applies via a written application (a past cycle's InnerVU recruitment calendar listed an early-September deadline via vandy.link/scno/application); the club encourages applicants from all backgrounds and…"},{"n":"Vanderbilt Case Competition Club (VC3)","c":"CONSULTING","d":"Organization dedicated to preparing students to compete in case competitions nationwide through education, financial support, and hands-on training via sponsored events. Has organized the…","u":"https://www.vandycasecomp.org/","s":"https://www.vandycasecomp.org/","cf":"UNVERIFIED"},{"n":"Owen Strategy and Consulting Club (OSCC)","c":"CONSULTING","d":"Student-run club at Vanderbilt's Owen Graduate School of Management for MBA students interested in consulting and corporate strategy. Provides interview preparation, resources, and…","u":"https://anchorlink.vanderbilt.edu/organization/OSCC","s":"https://business.vanderbilt.edu/news/2018/01/08/become-consultant-vanderbilt-business/","cf":"LIKELY"},{"n":"Anchor Marketing","c":"BUSINESS","d":"Team of Vanderbilt students exploring the marketing industry and developing skills through real-world consulting work. Notably inclusive: open to members whether experienced or new to the…","u":"https://vanderbilthustler.com/2024/03/01/charting-the-course-exploring-vanderbilts-business-organizations-landscape/","s":"https://vanderbilthustler.com/2024/03/01/charting-the-course-exploring-vanderbilts-business-organizations-landscape/","cf":"UNVERIFIED"},{"n":"VandyHacks","c":"TECH","d":"Vanderbilt's student-run hackathon organization, founded in 2015, that hosts one of the largest hackathons in the South: a 24-hour in-person event with student and company-led workshops, a…","u":"https://vandyhacks.org/","s":"https://vandyhacks.org/","cf":"LIKELY","a":"Hacker registration anticipated to open mid-August and close early October; applications go through apply.vandyhacks.org."},{"n":"VandyApps","c":"TECH","d":"Vanderbilt's computer science and app development club, founded in 2009 as the Vanderbilt Mobile Applications Team. Teaches software engineering through multi-week sessions (iOS, Android,…","u":"https://vandyapps.github.io/","s":"https://vandyapps.github.io/about/","cf":"LIKELY"},{"n":"Change++","c":"TECH","d":"Student organization founded in 2019 that builds free custom full-stack software for nonprofits. Partners with 5-7 nonprofits per year; members work in company-style teams of a product…","u":"https://changeplusplus.org/","s":"https://changeplusplus.org/","cf":"LIKELY","a":"Holds information sessions about its application process; a previous recruitment info session ran 5-6 PM in Featheringill Hall."},{"n":"VandyAI","c":"AI","d":"Vanderbilt's community for artificial intelligence enthusiasts, with a mission to foster learning and discovery around innovative AI technologies. Hosts weekly meetings, guest speakers, AI…","u":"https://vandyai.github.io/","s":"https://vandyai.github.io/","cf":"LIKELY"},{"n":"Vanderbilt Data Science Club (VDS)","c":"TECH","d":"Undergraduate club for students passionate about data-driven solutions to real-world community problems. Offers hands-on projects, workshops (e.g., Jupyter Notebooks sessions), and general…","u":"https://vandydatascienceclub.github.io/","s":"https://vandydatascienceclub.github.io/","cf":"LIKELY"},{"n":"Vanderbilt Women in Computing (ACM-W)","c":"TECH","d":"Student organization supporting and promoting inclusion in computing at Vanderbilt, welcoming people of all genders and experience levels. Best known for hosting Emerge, a free annual…","u":"https://engineering.vanderbilt.edu/2023/03/30/learn-more-about-chatbots-at-a-free-student-organized-ai-conference-april-8/","s":"https://engineering.vanderbilt.edu/2023/03/30/learn-more-about-chatbots-at-a-free-student-organized-ai-conference-april-8/","cf":"LIKELY"},{"n":"Vanderbilt Innovation and Entrepreneurship Society (VINES)","c":"ENTREPRENEURSHIP","d":"Vanderbilt's undergraduate entrepreneurship organization. VINES serves passionate innovators in executing ideas by providing resources, education, and an entrepreneurial community. Programs…","u":"https://vines.vu/","s":"https://vines.vu/","cf":"LIKELY","a":"Per a 2021 interview with a VINES leader: any student can join at any time through Anchor Link or the club GroupMe; the only application-based program is the Innovation and Entrepreneurship Cohort (about 25…"},{"n":"Vanderbilt Social Venture Club","c":"ENTREPRENEURSHIP","d":"Student leadership arm of Vanderbilt's Center for Social Ventures (Turner Family Center): an interdisciplinary, student-led organization developing socially and environmentally conscious…","u":"https://anchorlink.vanderbilt.edu/organization/tfc","s":"https://anchorlink.vanderbilt.edu/organization/tfc","cf":"LIKELY","a":"Any Vanderbilt student is welcome to engage with programming; fuller engagement comes through club membership (per AnchorLink snippet)."},{"n":"Owen Venture and Entrepreneurship Club (OVEC)","c":"ENTREPRENEURSHIP","d":"Student-run club at Vanderbilt's Owen Graduate School of Management building a community of entrepreneurs. It gives students exposure to all things entrepreneurial, including fundraising,…","u":"https://anchorlink.vanderbilt.edu/organization/owenvec","s":"https://business.vanderbilt.edu/news/2019/12/10/owen-venture-and-entrepreneurship-club-helps-students-build-community-and-raise-capital/","cf":"LIKELY"},{"n":"Design for America - Vanderbilt Studio","c":"ENTREPRENEURSHIP","d":"Vanderbilt chapter (studio) of Design for America, a national network of student innovators using design-thinking skills for local social impact. Students in campus studios work on…","u":"https://anchorlink.vanderbilt.edu/organization/designforamerica","s":"https://www.designforamerica.org/studios","cf":"LIKELY"},{"n":"Vanderbilt Innovation Council (VIC)","c":"ENTREPRENEURSHIP","d":"Described as a diverse Vanderbilt organization committed to fostering innovation in Nashville and the Southeast, with student members drawn from all 10 of Vanderbilt's schools, aiming to…","u":"https://universityinnovation.org/wiki/School:Vanderbilt_University","s":"https://universityinnovation.org/wiki/School:Vanderbilt_University","cf":"UNVERIFIED"},{"n":"Product Space @ Vanderbilt","c":"PRODUCT","d":"Vanderbilt's product management community, founded Spring 2021 to cultivate product leaders at the intersection of business and technology. Its core offering is a fellowship — a training…","u":"https://productspacevandy.framer.website/","s":"https://www.vanderbilt.edu/innervu/news/product-space-fellowship-recruitment","cf":"LIKELY","a":"Fellowship recruitment runs via application, with info sessions posted on AnchorLink and a public Fellowship Recruitment Hub on Notion (productspacevandy.notion.site). No internships required — applicants are…"},{"n":"Alpha Kappa Psi (Omega Nu Chapter)","c":"BUSINESS","d":"Vanderbilt's oldest and largest co-ed professional business fraternity, established in 2006 (Omega Nu chapter). Members get access to a network of current members and alumni for exploring…","u":"https://www.vanderbiltakpsi.com/","s":"https://www.vanderbiltakpsi.com/recruitment","cf":"LIKELY","a":"Recruitment via application posted on vanderbiltakpsi.com and AnchorLink; resumes are reviewed blindly (names and affiliations removed). A recent cycle ran Jan 14–24, 2025 (spring recruitment)."},{"n":"Delta Sigma Pi (Omicron Chapter)","c":"BUSINESS","d":"Co-ed professional business fraternity founded on scholarship, professionalism, and brotherhood; the Omicron chapter was reinstalled at Vanderbilt (announced 2018, initiated 2019 per…","u":"https://www.vudsp.org/","s":"https://www.vudsp.org/readme","cf":"LIKELY","a":"Recruitment described on the 'Become a DeltaSig' page (vudsp.org/readme): structured around an equitable candidate experience, an educational professional-development journey, and cultivating diverse,…"},{"n":"Vanderbilt Business Review","c":"BUSINESS","d":"Student-produced undergraduate business publication described as connecting the Vanderbilt student community with the broader business world; publishes business-focused articles and…","u":"https://vanderbiltbusinessreview.com/","s":"https://vanderbiltbusinessreview.com/an-inside-look-at-the-recruitment-process-at-business-fraternity-akpsi/","cf":"UNVERIFIED"}],"programs":[{"n":"Wond'ry IMPACT Program","c":"ENTREPRENEURSHIP","d":"Seen 2026-08-28: intensive three-year Wond'ry program for undergraduates to turn innovative research into scalable, human-centered commercialization — coursework, internships, funding, and…","u":"https://www.vanderbilt.edu/the-wondry/impact-program/","s":"https://www.vanderbilt.edu/the-wondry/impact-program/","cf":"LIKELY","a":"Applications are open with a deadline of September 1, 2026 (as stated in official-domain search snippet).","dl":"2026-09-01"},{"n":"Wond'ry Sullivan Family Ideator Program","c":"ENTREPRENEURSHIP","d":"Seen 2026-08-28: free, noncredit two-part idea-evaluation program run with the NSF I-Corps Mid-South Hub for university-affiliated innovators (students, staff, faculty, alumni) who haven't…","u":"https://www.vanderbilt.edu/the-wondry/sullivan-family-ideator/","s":"https://www.vanderbilt.edu/the-wondry/sullivan-family-ideator/","cf":"LIKELY","a":"Search results indicate fall 2026 cohort registration deadline of September 1, 2026 via events.vanderbilt.edu (Sullivan Family Ideator Program Registration) — verify, snippet-sourced."},{"n":"Wond'ry Builder Program","c":"ENTREPRENEURSHIP","d":"Seen 2026-08-28: middle stage of the Wond'ry's Ideator-Builder-Founder startup continuum. Provides tools to turn a validated idea into a tangible product or service with potential to…","u":"https://www.vanderbilt.edu/the-wondry/programs/","s":"https://www.vanderbilt.edu/the-wondry/programs/","cf":"LIKELY"},{"n":"Wond'ry Founder Program","c":"ENTREPRENEURSHIP","d":"Seen 2026-08-28: the Wond'ry's top-stage program for established ventures, providing resources, connections, mentorship, and funding opportunities. Stated requirements: completion of the…","u":"https://www.vanderbilt.edu/the-wondry/entrepreneurship/","s":"https://www.vanderbilt.edu/the-wondry/entrepreneurship/","cf":"LIKELY","a":"Applications to the Founder Program are open year-round; selected teams are invited to join as space becomes available (as stated in search results)."},{"n":"Wond'ry Mentors in Residence (mentorship network)","c":"ENTREPRENEURSHIP","d":"Seen 2026-08-28: network of 230+ entrepreneurs, executives, and industry experts across disciplines who share experience with the Wond'ry ecosystem through one-on-one, personalized…","u":"https://www.wondrymentors.com/","s":"https://www.vanderbilt.edu/thewondry/become-a-mentor/","cf":"LIKELY"},{"n":"Wond'ry Makerspaces (mechanical, electrical, fiber arts)","c":"ENTREPRENEURSHIP","d":"Seen 2026-08-28: no-cost prototyping facilities for the Vanderbilt community and Wond'ry partners — Mechanical Makerspace (3D printing, laser cutting, plastics forming, powered/analog hand…","u":"https://www.vanderbilt.edu/the-wondry/making-and-design/","s":"https://www.vanderbilt.edu/the-wondry/mechanical-makerspace/","cf":"LIKELY"},{"n":"Sohr Grants (Owen Graduate School of Management)","c":"ENTREPRENEURSHIP","d":"Seen 2026-08-28: $25,000 grants endowed by Jim Sohr (BE'86, MBA'90) to promote student entrepreneurship at the Owen School. Students pitch their ideas to a panel of seasoned entrepreneurs…","u":"https://business.vanderbilt.edu/news/2017/12/19/team-leaf-wins-25000-sohr-grant/","s":"https://business.vanderbilt.edu/news/2017/12/19/team-leaf-wins-25000-sohr-grant/","cf":"LIKELY"},{"n":"SEC Student Pitch Competition (Wond'ry nomination)","c":"ENTREPRENEURSHIP","d":"Seen 2026-08-28: annual startup pitch competition among student teams from all 16 SEC universities, with a $25,000 prize fund; top three teams pitch a judging panel. Each university sends…","u":"https://www.vanderbilt.edu/thewondry/competitions/","s":"https://www.vanderbilt.edu/the-wondry/2024/11/15/sudiksha-singhal-with-brace-cap-wins-2024-sec-pitch-competition/","cf":"LIKELY"}],"labs":[{"n":"Network and Data Science (NDS) Lab","c":"ai-ml","p":"Tyler Derr","dept":"Computer Science, School of Engineering","d":"GNNs, recommender systems, and social-network data mining sit exactly at your CS+Econ intersection, and DSI-SRP has funded undergrads in this lab before — a proven path in.","u":"https://nds-vu.github.io/","s":"https://www.vanderbilt.edu/valiant/2024/11/14/network-and-data-science-nds-lab/","cf":"LIKELY","a":"Attend the DSI-SRP fall info session; email Prof. Derr in early spring with a proposal idea.","ug":true},{"n":"Machine Intelligence and Neural Technologies (MINT) Lab","c":"ai-ml","p":"Soheil Kolouri","dept":"Computer Science, School of Engineering","d":"ML theory and optimal transport — a stretch target if the math side of CS+Econ excites you; the lab explicitly welcomes Vanderbilt undergrads.","u":"https://mint-vu.github.io/","s":"https://www.vanderbilt.edu/valiant/2024/07/21/machine-intelligence-and-neural-technologies-mint/","cf":"LIKELY","a":"Park until spring; take the most proof-heavy math you can this year.","ug":true},{"c":"ai-ml","p":"Meiyi Ma","dept":"Computer Science / Institute for Software Integrated…","d":"AI for healthcare and smart cities with the strongest structural undergrad path found: her projects appear directly in the School of Engineering's PAID summer research program ($8,000).","u":"https://meiyima.github.io/","s":"https://engineering.vanderbilt.edu/summer-research/SummerReOpps/CSSummerResearch/ma-2023.php","cf":"LIKELY","a":"Watch for the SoE summer research posting (winter); email Prof. Ma in January.","ug":true},{"n":"Medical-image Analysis and Statistical Interpretation (MASI) Lab","c":"ai-ml","p":"Bennett Landman","dept":"Electrical and Computer Engineering / Computer Science;…","d":"Large, well-funded ML-for-imaging lab that documents undergraduate members and hosts VISE summer students — realistic access to serious deep-learning infrastructure.","u":"https://my.vanderbilt.edu/masi/","s":"https://my.vanderbilt.edu/masi/people/","cf":"LIKELY","a":"Do one U-Net tutorial project first so the outreach email has substance.","ug":true},{"n":"Data Science Institute Summer Research Program (DSI-SRP)","c":"ai-ml","p":"Any full-time Vanderbilt faculty mentor (student proposes the pairing)","dept":"Vanderbilt Data Science Institute (university-wide)","d":"The funding vehicle, not a lab: $6,000 for 10 weeks of summer research with ANY Vanderbilt faculty mentor, explicitly open to students without a data science background.","u":"https://www.vanderbilt.edu/datascience/undergraduate-summer-research-program/","s":"https://www.vanderbilt.edu/datascience/undergraduate-summer-research-program/","cf":"LIKELY","e":"datascience@vanderbilt.edu","a":"Calendar the info session; draft a proposal with a target mentor by winter break.","ug":true},{"n":"Neuroimaging and Brain Dynamics (NEURDY) Lab","c":"ai-ml","p":"Catie Chang","dept":"Electrical and Computer Engineering / Computer Science;…","d":"ML on brain-imaging time series — strong if the AI-for-neuroscience angle appeals; ECE/CS home makes CS skills directly useful.","u":"https://www.cchanglab.net/","s":"https://www.cchanglab.net/people","cf":"LIKELY","e":"catie.chang@vanderbilt.edu","a":"Read the lab's projects page before outreach.","ug":true},{"n":"Vanderbilt Data Science Institute – Undergraduate Summer Research Program (DSI-SRP)","c":"data-science","p":"Jesse Spencer-Smith (Chief Data Scientist and Interim Director, DSI)","dept":"Data Science Institute (university-wide)","d":"DSI's undergraduate programs (mentorship, workshops) — the lowest-friction way to build data-science credibility as a first-year.","u":"https://www.vanderbilt.edu/datascience/undergraduate-summer-research-program/","s":"https://www.vanderbilt.edu/datascience/undergraduate-summer-research-program/","cf":"LIKELY","e":"datascience@vanderbilt.edu","a":"Sign up for the current cohort/workshops now.","ug":true},{"n":"DSI Data Science Team (semester project teams)","c":"data-science","p":"Jesse Spencer-Smith (leads the DSI staff data science team)","dept":"Data Science Institute (university-wide)","d":"Semester-long applied data-science project teams open to undergrads — immediate, this-semester research experience without a faculty cold-email.","u":"https://www.vanderbilt.edu/datascience/data-science-research/","s":"https://www.vanderbilt.edu/datascience/data-science-research/","cf":"LIKELY","e":"datascience@vanderbilt.edu","a":"Check the DSI team application window this fall.","ug":true},{"n":"LAPOP Lab (Latin American Public Opinion Project) / Center for Global Democracy","c":"data-science","p":"Noam Lupu (Director; Gertrude Conaway Vanderbilt Professor of Political Science); Elizabeth Zechmeister (longtime prior director)","dept":"Political Science / Center for Global Democracy","d":"World-class survey-data operation (AmericasBarometer) that uses undergrad RAs — political economy data work that complements the Econ major.","u":"https://www.vanderbilt.edu/lapop/","s":"https://www.vanderbilt.edu/lapop/undergrad-students.php","cf":"LIKELY","e":"lapop@vanderbilt.edu","a":"Ask the Econ department about LAPOP RA openings.","ug":true},{"n":"Vanderbilt LGBTQ+ Policy Lab","c":"data-science","p":"Tara McKay (Director); Christopher \"Kitt\" Carpenter (Founding Director; E. Bronson Ingram University Professor of Economics)","dept":"Economics / Medicine, Health & Society (cross-college lab)","d":"Health/econ policy lab led in part by economics faculty (Carpenter) with a track record of undergraduate RAs — real applied-econometrics experience.","u":"https://www.vanderbilt.edu/lgbtq-policy-lab/","s":"https://www.vanderbilt.edu/lgbtq-policy-lab/education/","cf":"LIKELY","e":"tara.mckay@vanderbilt.edu","a":"Watch for RA postings; ask in ECON office hours.","ug":true},{"n":"Baroud Research Group (data analytics for risk and resilience)","c":"data-science","p":"Hiba Baroud (Associate Professor and Associate Chair, Civil & Environmental Engineering; secondary appointment in Computer Science)","dept":"Civil & Environmental Engineering","d":"Data analytics for infrastructure risk/resilience — applied data science with policy relevance; engineering home welcomes cross-listed students.","u":"https://engineering.vanderbilt.edu/bio/hiba-baroud/","s":"https://www.vanderbilt.edu/datascience/category/dsi-srp/","cf":"LIKELY","a":"Skim recent group papers before outreach.","ug":true},{"n":"Center for the Study of Democratic Institutions (CSDI) / Vanderbilt Poll","c":"data-science","p":"Joshua Clinton and John Sides (co-directors); John Geer (co-founder, Vanderbilt Poll co-director)","dept":"Political Science","d":"Political-economy data research with undergrad RA involvement — pairs naturally with Econ and quantitative interests.","u":"https://www.vanderbilt.edu/csdi/","s":"https://www.vanderbilt.edu/csdi/about.php","cf":"LIKELY","a":"Ask about spring RA openings.","ug":true},{"n":"VeriVITAL (Verification and Validation for Intelligent and Trustworthy Autonomy Laboratory)","c":"systems-software","p":"Taylor T. Johnson","dept":"Computer Science / EECS and Institute for Software…","d":"Verification of neural networks and autonomous systems — where rigorous CS meets ML safety; ISIS labs regularly employ students.","u":"http://www.verivital.com/","s":"https://www.taylortjohnson.com/?m=people","cf":"LIKELY","e":"taylor.johnson@vanderbilt.edu","a":"Revisit after CS 2201 (data structures).","ug":true},{"n":"MIND Lab (Mixed INtelligence Development for programming)","c":"systems-software","p":"Yu Huang","dept":"Computer Science (affiliated with ISIS and Peabody College…","d":"Human factors of AI and software engineering — accessible empirical CS research where first-years can run studies and analyze data.","u":"https://yuhuang-lab.github.io/","s":"https://yuhuang-lab.github.io/","cf":"LIKELY","a":"Read one MIND paper and reach out this semester.","ug":true},{"n":"Kevin Leach's research group","c":"systems-software","p":"Kevin Leach","dept":"Computer Science (affiliated with ISIS)","d":"Systems/security/reliability research; the group's page indicates openness to motivated undergrads.","u":"https://kjl.name/","s":"https://kjl.name/people","cf":"LIKELY","a":"Revisit sophomore year unless systems pulls you now.","ug":true},{"n":"SCOPE Lab (ScopeLab)","c":"systems-software","p":"Abhishek Dubey","dept":"Computer Science / Electrical and Computer Engineering,…","d":"City-scale CPS + ML (smart transit with Nashville) — applied systems work with real deployments, adjacent to startup-style building.","u":"https://scopelab.ai/","s":"https://cps-vo.org/group/ISIS-internships/projects","cf":"LIKELY","a":"Look at SCOPE's public repos before outreach.","ug":true},{"n":"Department of Economics Honors Program (with John J. Siegfried Honors Student Research Fund)","c":"econ-fintech","p":"Honors Program Director, Department of Economics (current holder not named in accessible sources; department contact published)","dept":"Economics (College of Arts and Science)","d":"The Econ department's structured research pathway — the long-game vehicle for senior thesis research with faculty mentorship.","u":"https://as.vanderbilt.edu/economics/undergraduate-honors/","s":"https://as.vanderbilt.edu/economics/undergraduate-honors/","cf":"LIKELY","e":"economics@vanderbilt.edu","a":"Map the prerequisite sequence with your Econ advisor.","ug":true},{"n":"Vanderbilt University Experimental Economics Lab (VUEEL)","c":"econ-fintech","p":"Run by Department of Economics faculty and graduate students (experimental economist Greg Leo has been affiliated with the lab; confirm current faculty lead with the department)","dept":"Economics (College of Arts and Science)","d":"Behavioral/experimental economics lab — participate first, then ask about RA work; direct line to experimental econ methods.","u":"https://my.vanderbilt.edu/vueel/","s":"https://my.vanderbilt.edu/vueel/about-our-lab/","cf":"LIKELY","a":"Register in the participant pool this semester.","ug":true},{"n":"Vanderbilt Policy Accelerator for Political Economy and Regulation (VPA)","c":"econ-fintech","p":"Ganesh Sitaraman (Founding Director, New York Alumni Chancellor's Chair in Law); Asad Ramzanali (Director of AI and Technology Policy)","dept":"Vanderbilt Law School (tech policy / political economy)","d":"Tech policy/regulation research (AI, platforms, finance) — bridges your CS+Econ+startup interests on the policy side; undergrad access unverified.","u":"https://www.vanderbilt.edu/vanderbilt-policy-accelerator/","s":"https://www.vanderbilt.edu/vanderbilt-policy-accelerator/work-with-our-team/","cf":"LIKELY","e":"policyaccelerator@vanderbilt.edu","a":"Verify undergrad access before investing time.","ug":true},{"n":"Hans Stoll Financial Markets Research Center (FMRC), Owen Graduate School of Management","c":"econ-fintech","p":"Robert E. Whaley (Valere Blair Potter Professor of Management and longtime FMRC Director; granted emeritus status in 2025 — confirm current director)","dept":"Finance, Owen Graduate School of Management","d":"Vanderbilt's financial-markets research center (Whaley — VIX creator): the highest-affinity finance research target; undergrad access unverified, likely Owen-oriented.","u":"https://business.vanderbilt.edu/our-school/centers/","s":"https://news.vanderbilt.edu/2021/04/22/financial-markets-research-center-renamed-for-hans-stoll/","cf":"LIKELY","a":"Verify access; revisit after a finance course.","ug":true}]};
+
   /* ===================== small date + format helpers ==================== */
   var DAY_ABBR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   var DAY_FULL = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
@@ -797,6 +820,9 @@ function countCourseCodes(text) {
       f.push({ points: Math.min(20, it.weight * 0.6), label: it.weight >= 10 ? it.weight + "% of grade" : null });
     }
     if (it.kind === "EXAM") f.push({ points: 8, label: "exam — needs spaced prep, not one sitting" });
+    if (it.kind === "APPLICATION") {
+      f.push({ points: 10, label: "application deadline — there is no make-up for missing it" });
+    }
     var diff = course && course.difficulty ? course.difficulty : 3;
     f.push({ points: (diff - 3) * 2, label: diff >= 5 ? "historically difficult material" : null });
     if (it.status === "IN_PROGRESS") f.push({ points: 4, label: "already in progress — finish it" });
@@ -837,6 +863,18 @@ function countCourseCodes(text) {
       else if (d <= 3 && i.status === "NOT_STARTED" && (i.estMinutes || 0) >= 120)
         out.push({ sev: "warn", text: name + " needs " + fmtMinutes(i.estMinutes) + " and you have not started it" });
     });
+    // Opportunities close whether or not you remembered to track them.
+    catalogDeadlines().forEach(function (o) {
+      if (isTracked(st, o)) return;
+      var d = daysUntil(o.due, now);
+      if (d < 0 || d > 14) return;
+      out.push({
+        sev: d <= 3 ? "crit" : "warn",
+        text: o.n + " closes " + (d === 0 ? "today" : d === 1 ? "tomorrow" : "in " + d + " days") +
+          " and you are not tracking it — open Campus to add it or dismiss it."
+      });
+    });
+
     // Heavy-day detection: total estimated work landing on one calendar day.
     var byDay = {};
     st.items.forEach(function (i) {
@@ -853,6 +891,30 @@ function countCourseCodes(text) {
       }
     });
     return out;
+  }
+
+  /** Every catalog entry that carries a researched deadline, soonest first. */
+  function catalogDeadlines() {
+    var out = [];
+    CATALOG.clubs.concat(CATALOG.programs).forEach(function (o) {
+      if (!o.dl) return;
+      var d = new Date(o.dl + "T23:59:00");
+      if (!isNaN(d.getTime())) out.push({ n: o.n, due: d, o: o });
+    });
+    return out.sort(function (a, b) { return a.due - b.due; });
+  }
+  function isTracked(st, o) {
+    return st.items.some(function (i) { return i.ref === o.n; }) ||
+           (st.dismissed || []).indexOf(o.n) !== -1;
+  }
+  function trackOpportunity(o, due) {
+    state.items.push({
+      id: uid(), courseId: null, title: o.n + " — application",
+      kind: "APPLICATION", dueAt: due, estMinutes: 120, weight: 0,
+      status: "NOT_STARTED", ref: o.n, url: o.u || o.s || null
+    });
+    flash = { sev: "good", text: o.n + " is now in your ranked work. Confirm the deadline on their site — it was read on " + CATALOG.verifiedAt + "." };
+    touch(); render();
   }
 
   function courseOf(st, id) {
@@ -1031,10 +1093,15 @@ function countCourseCodes(text) {
       if (i.status === "DONE" || !i.dueAt) return false;
       var d = parseDue(i.dueAt); return d && daysUntil(d, now) <= 0;
     }).length;
+    var closing = catalogDeadlines().filter(function (o) {
+      var d = daysUntil(o.due, now);
+      return d >= 0 && d <= 7 && !isTracked(state, o);
+    }).length;
     var defs = [
       ["now", "Now", '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', due],
       ["week", "Week", '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>', 0],
       ["work", "Work", '<path d="M4 6h16M4 12h16M4 18h10"/>', 0],
+      ["campus", "Campus", '<path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 10.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5"/>', closing],
       ["setup", "Classes", '<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/>', 0]
     ];
     return h("nav", { class: "tabs" }, defs.map(function (d) {
@@ -1194,6 +1261,18 @@ function countCourseCodes(text) {
     });
     return frag([
       h("p", { class: "lede", style: "margin-bottom:18px", text: "Your week as it actually runs — classes from your schedule, with everything due that day underneath." }),
+      (function () {
+        var noTimes = state.courses.filter(function (c) { return !(c.meetings || []).length; });
+        if (!noTimes.length) return null;
+        return h("div", { class: "note warn", style: "margin-bottom:14px" }, [
+          document.createTextNode(
+            noTimes.length + " of your " + state.courses.length + " classes have no days or times yet (" +
+            noTimes.slice(0, 4).map(function (c) { return c.code; }).join(", ") +
+            (noTimes.length > 4 ? "…" : "") + "), so they are missing from this week."),
+          h("button", { class: "btn sm", style: "margin-left:10px", text: "Add times",
+            onclick: function () { tab = "setup"; window.scrollTo(0, 0); render(); } })
+        ]);
+      })(),
       h("div", { class: "stack" }, days.map(function (d) {
         var ms = meetingsOn(state, d);
         var offset = (d - todayDow + 7) % 7;
@@ -1378,36 +1457,99 @@ function countCourseCodes(text) {
   }
 
   function courseCard(c) {
-    return h("div", { class: "card" }, [
+    var ms = c.meetings || [];
+    var kids = [
       h("div", { class: "row-wrap" }, [
         h("span", { class: "dot", style: "background:" + c.color }),
         h("strong", { class: "grow", text: c.code + " — " + c.title }),
         h("button", { class: "btn sm danger", text: "Remove", onclick: function () {
+          if (!window.confirm("Remove " + c.code + " and anything filed under it?")) return;
           state.courses = state.courses.filter(function (x) { return x !== c; });
           state.items = state.items.filter(function (i) { return i.courseId !== c.id; });
           touch(); render();
         } })
       ]),
       h("div", { class: "why", style: "margin-top:5px", text: [
-        c.professor || "", c.credits ? c.credits + " credits" : "",
-        (c.meetings || []).length + " meeting" + ((c.meetings || []).length === 1 ? "" : "s")
-      ].filter(Boolean).join(" · ") }),
-      h("div", { style: "margin-top:8px" }, (c.meetings || []).map(function (m) {
-        return h("div", { class: "row", style: "font-size:12.5px;color:var(--ink-2)" }, [
-          h("span", { class: "mono", style: "min-width:34px", text: DAY_ABBR[m.dayOfWeek] }),
-          h("span", { class: "mono", text: fmtClock(m.startTime) + "–" + fmtClock(m.endTime) }),
-          h("span", { class: "grow", text: [m.location || "", m.kind !== "LECTURE" ? m.kind.toLowerCase() : ""].filter(Boolean).join(" · ") })
+        c.professor || "", c.credits ? c.credits + " credits" : ""
+      ].filter(Boolean).join(" · ") })
+    ];
+
+    // A course with no meetings is invisible on Week and Now — say so here,
+    // where it can be fixed, rather than letting the week look empty.
+    if (!ms.length) {
+      kids.push(h("p", { class: "note warn", style: "margin-top:8px",
+        text: "No days or times yet, so this class never appears on your week. Add its meetings below." }));
+    }
+
+    kids.push(h("div", { class: "stack-sm", style: "margin-top:9px" }, ms.map(function (m, mi) {
+      return h("div", { class: "row-wrap", style: "gap:6px" }, [
+        h("select", { class: "in", style: "width:auto;padding:6px 8px;font-size:13px",
+          onchange: function (e) { m.dayOfWeek = +e.target.value; touch(); render(); }
+        }, DAY_ABBR.map(function (d, di) {
+          return h("option", { value: di, selected: m.dayOfWeek === di, text: d });
+        })),
+        h("input", { class: "in", type: "time", style: "width:auto;padding:6px 8px;font-size:13px", value: m.startTime,
+          onchange: function (e) { if (e.target.value) { m.startTime = e.target.value; touch(); } } }),
+        h("input", { class: "in", type: "time", style: "width:auto;padding:6px 8px;font-size:13px", value: m.endTime,
+          onchange: function (e) { if (e.target.value) { m.endTime = e.target.value; touch(); } } }),
+        h("select", { class: "in", style: "width:auto;padding:6px 8px;font-size:13px",
+          onchange: function (e) { m.kind = e.target.value; touch(); }
+        }, ["LECTURE", "LAB", "DISCUSSION", "SEMINAR"].map(function (k) {
+          return h("option", { value: k, selected: (m.kind || "LECTURE") === k, text: k[0] + k.slice(1).toLowerCase() });
+        })),
+        h("input", { class: "in", style: "flex:1;min-width:110px;padding:6px 8px;font-size:13px",
+          placeholder: "Room", value: m.location || "",
+          onchange: function (e) { m.location = e.target.value.trim() || null; touch(); } }),
+        h("button", { class: "btn sm", text: "×", title: "Remove this meeting", onclick: function () {
+          c.meetings.splice(mi, 1); touch(); render();
+        } })
+      ]);
+    })));
+
+    kids.push(h("div", { class: "row-wrap", style: "margin-top:9px" }, [
+      h("button", { class: "btn sm" + (ms.length ? "" : " pri"), text: "+ Add a meeting", onclick: function () {
+        c.meetings = (c.meetings || []).concat([
+          { dayOfWeek: 1, startTime: "09:00", endTime: "09:50", kind: "LECTURE", location: null }
         ]);
+        touch(); render();
+      } }),
+      ms.length > 0 ? h("button", { class: "btn sm", title: "Copy this meeting's time onto other days",
+        text: "Repeat on MWF", onclick: function () {
+          var base = c.meetings[0];
+          [1, 3, 5].forEach(function (d) {
+            if (!c.meetings.some(function (m) { return m.dayOfWeek === d && m.startTime === base.startTime; })) {
+              c.meetings.push({ dayOfWeek: d, startTime: base.startTime, endTime: base.endTime, kind: base.kind, location: base.location });
+            }
+          });
+          c.meetings.sort(function (a, b) { return a.dayOfWeek - b.dayOfWeek || a.startTime.localeCompare(b.startTime); });
+          touch(); render();
+        } }) : null,
+      ms.length > 0 ? h("button", { class: "btn sm", text: "Repeat on TR", onclick: function () {
+          var base = c.meetings[0];
+          [2, 4].forEach(function (d) {
+            if (!c.meetings.some(function (m) { return m.dayOfWeek === d && m.startTime === base.startTime; })) {
+              c.meetings.push({ dayOfWeek: d, startTime: base.startTime, endTime: base.endTime, kind: base.kind, location: base.location });
+            }
+          });
+          c.meetings.sort(function (a, b) { return a.dayOfWeek - b.dayOfWeek || a.startTime.localeCompare(b.startTime); });
+          touch(); render();
+        } }) : null
+    ]));
+
+    kids.push(h("div", { class: "row-wrap", style: "margin-top:9px" }, [
+      h("label", { style: "margin:0;font-size:12px", text: "How hard is it?" }),
+      h("select", { class: "in", style: "width:auto;padding:5px 8px;font-size:13px",
+        onchange: function (e) { c.difficulty = +e.target.value; touch(); }
+      }, [1, 2, 3, 4, 5].map(function (n) {
+        return h("option", { value: n, selected: (c.difficulty || 3) === n, text: ["easy", "light", "normal", "hard", "brutal"][n - 1] });
       })),
-      h("div", { class: "row-wrap", style: "margin-top:9px" }, [
-        h("label", { style: "margin:0;font-size:12px", text: "How hard is it?" }),
-        h("select", { class: "in", style: "width:auto;padding:5px 8px;font-size:13px",
-          onchange: function (e) { c.difficulty = +e.target.value; touch(); }
-        }, [1, 2, 3, 4, 5].map(function (n) {
-          return h("option", { value: n, selected: (c.difficulty || 3) === n, text: ["easy", "light", "normal", "hard", "brutal"][n - 1] });
-        }))
-      ])
-    ]);
+      h("label", { style: "margin:0 0 0 8px;font-size:12px", text: "Credits" }),
+      h("input", { class: "in", type: "number", min: "0", max: "12", step: "0.5",
+        style: "width:70px;padding:5px 8px;font-size:13px", value: c.credits || "",
+        onchange: function (e) { c.credits = e.target.value ? +e.target.value : null; touch(); } })
+    ]));
+
+    return h("div", { class: "card" }, kids);
   }
 
   function viewReview() {
@@ -1494,6 +1636,112 @@ function countCourseCodes(text) {
     touch(); tab = "week"; window.scrollTo(0, 0); render();
   }
 
+  /* ------------------------------ CAMPUS ------------------------------ */
+  var campusKind = "clubs";
+  var campusQ = "";
+
+  function viewCampus() {
+    var now = new Date();
+    var out = [];
+
+    var deadlines = catalogDeadlines().filter(function (o) { return daysUntil(o.due, now) >= 0; });
+    if (deadlines.length) {
+      out.push(h("div", { class: "section" }, [
+        h("div", { class: "section-head" }, [
+          h("h2", { text: "Closing soon" }),
+          h("span", { class: "count", text: "researched " + CATALOG.verifiedAt })
+        ]),
+        h("div", { class: "stack-sm" }, deadlines.map(function (d) {
+          var days = daysUntil(d.due, now);
+          var tracked = state.items.some(function (i) { return i.ref === d.n; });
+          var dismissed = (state.dismissed || []).indexOf(d.n) !== -1;
+          return h("div", { class: "act", "data-p": days <= 3 ? "CRITICAL" : days <= 7 ? "HIGH" : "MEDIUM", style: "cursor:default" }, [
+            h("div", { class: "grow" }, [
+              h("div", { class: "row-wrap" }, [
+                h("div", { class: "ttl grow", text: d.n }),
+                h("span", { class: "chip " + (days <= 3 ? "crit" : "warn"),
+                  text: days === 0 ? "closes today" : days === 1 ? "tomorrow" : days + " days" })
+              ]),
+              h("div", { class: "why", text: "Closes " + MONTHS[d.due.getMonth()] + " " + d.due.getDate() + ". " + (d.o.a || "") }),
+              h("div", { class: "row-wrap", style: "margin-top:9px" }, [
+                tracked
+                  ? h("span", { class: "chip good", text: "tracking" })
+                  : dismissed
+                    ? h("button", { class: "btn sm", text: "Track after all", onclick: function () {
+                        state.dismissed = (state.dismissed || []).filter(function (x) { return x !== d.n; });
+                        trackOpportunity(d.o, d.o.dl);
+                      } })
+                    : h("button", { class: "btn sm pri", text: "Track this", onclick: function () { trackOpportunity(d.o, d.o.dl); } }),
+                !tracked && !dismissed ? h("button", { class: "btn sm", text: "Not for me", onclick: function () {
+                  state.dismissed = (state.dismissed || []).concat([d.n]); touch(); render();
+                } }) : null,
+                d.o.s ? h("a", { class: "btn sm", href: d.o.s, target: "_blank", rel: "noreferrer", text: "Verify on their site" }) : null
+              ])
+            ])
+          ]);
+        }))
+      ]));
+    }
+
+    var tabs = [["clubs", "Clubs", CATALOG.clubs.length], ["programs", "Wond'ry", CATALOG.programs.length], ["labs", "Labs", CATALOG.labs.length]];
+    out.push(h("div", { class: "row-wrap", style: "margin-bottom:12px" }, tabs.map(function (t) {
+      return h("button", {
+        class: "btn sm" + (campusKind === t[0] ? " pri" : ""),
+        text: t[1] + " " + t[2],
+        onclick: function () { campusKind = t[0]; render(); }
+      });
+    })));
+
+    var search = h("input", { class: "in", placeholder: "Filter — finance, AI, consulting, neuro…", value: campusQ,
+      oninput: function (e) { campusQ = e.target.value; renderCampusList(listHost); } });
+    out.push(h("div", { style: "margin-bottom:12px" }, [search]));
+
+    var listHost = h("div", { class: "stack-sm" });
+    renderCampusList(listHost);
+    out.push(listHost);
+
+    out.push(h("p", { class: "why", style: "margin-top:18px", text:
+      "Gathered from official Vanderbilt sources on " + CATALOG.verifiedAt +
+      ". Each entry says how well it was confirmed — read cleanly means the official page itself was read; " +
+      "check this means it came from a search snippet. Confirm any deadline on the source before you rely on it." }));
+    return frag(out);
+  }
+
+  function renderCampusList(host) {
+    host.textContent = "";
+    var q = campusQ.trim().toLowerCase();
+    var rows = CATALOG[campusKind].filter(function (o) {
+      if (!q) return true;
+      return ((o.n || "") + " " + (o.c || "") + " " + (o.d || "") + " " + (o.p || "") + " " + (o.dept || ""))
+        .toLowerCase().indexOf(q) !== -1;
+    });
+    if (!rows.length) {
+      host.appendChild(h("div", { class: "card" }, [h("p", { class: "empty", text: "Nothing matches “" + campusQ + "”." })]));
+      return;
+    }
+    rows.forEach(function (o) {
+      var tracked = state.items.some(function (i) { return i.ref === o.n; });
+      host.appendChild(h("div", { class: "card" }, [
+        h("strong", { style: "display:block;line-height:1.3", text: o.n }),
+        h("div", { class: "row-wrap", style: "margin-top:6px" }, [
+          h("span", { class: "chip", text: String(o.c || "").replace(/_/g, " ").toLowerCase() }),
+          h("span", { class: "chip " + (o.cf === "VERIFIED" ? "good" : o.cf === "LIKELY" ? "warn" : ""),
+            text: o.cf === "VERIFIED" ? "read cleanly" : o.cf === "LIKELY" ? "check this" : "unconfirmed" }),
+          o.ug ? h("span", { class: "chip good", text: "takes undergrads" }) : null
+        ]),
+        o.p ? h("div", { class: "why", style: "margin-top:4px", text: o.p + (o.dept ? " · " + o.dept : "") }) : null,
+        h("p", { class: "why", style: "margin-top:5px", text: o.d || "" }),
+        o.a ? h("p", { class: "why", style: "margin-top:6px", text: (campusKind === "labs" ? "Next step: " : "How to get in: ") + o.a }) : null,
+        h("div", { class: "row-wrap", style: "margin-top:9px" }, [
+          o.u ? h("a", { class: "btn sm", href: o.u, target: "_blank", rel: "noreferrer", text: "Open" }) : null,
+          o.e ? h("a", { class: "btn sm", href: "mailto:" + o.e, text: "Email" }) : null,
+          o.dl && !tracked ? h("button", { class: "btn sm pri", text: "Track deadline", onclick: function () { trackOpportunity(o, o.dl); } }) : null,
+          tracked ? h("span", { class: "chip good", text: "tracking" }) : null
+        ])
+      ]));
+    });
+  }
+
   /* ============================== main render ========================== */
   function render() {
     root.textContent = "";
@@ -1507,7 +1755,8 @@ function countCourseCodes(text) {
     root.appendChild(
       tab === "now" ? viewNow() :
       tab === "week" ? viewWeek() :
-      tab === "work" ? viewWork() : viewSetup()
+      tab === "work" ? viewWork() :
+      tab === "campus" ? viewCampus() : viewSetup()
     );
     root.appendChild(h("hr", { class: "sep" }));
     root.appendChild(h("p", { class: "why", style: "text-align:center;padding-bottom:10px", text:

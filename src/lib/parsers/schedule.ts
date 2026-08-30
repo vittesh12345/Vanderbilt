@@ -404,6 +404,15 @@ function extractProfessor(block: string): string | null {
     .trim();
   if (!name || /^(?:staff|tba|tbd)$/i.test(name)) return null;
   if (!/[A-Za-z]/.test(name)) return null;
+  // YES pages put enrollment prose next to the word "instructor" —
+  // "consent of instructor and DUS after first day of class, 8/26/2026".
+  // A person's name has no digits, does not open with a lowercase
+  // connective, and is not a sentence. Anything else is not a name.
+  if (/\d/.test(name)) return null;
+  if (/^(?:and|or|of|the|for|with|from|by|to|is|are|no|not|see|consent|permission)\b/i.test(name)) {
+    return null;
+  }
+  if (name.split(/\s+/).length > 6) return null;
   return name.slice(0, 60);
 }
 

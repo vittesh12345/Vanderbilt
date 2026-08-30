@@ -93,7 +93,8 @@ a{color:var(--gold)}
 .act[data-p="MEDIUM"]{border-left-color:var(--gold-soft)}
 .act .rank{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--muted);padding-top:2px;min-width:14px}
 .act .ttl{font-weight:600;line-height:1.3}
-.act .why{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+.why{font-size:12.5px;color:var(--muted);line-height:1.45}
+.act .why{margin-top:3px}
 .act.done .ttl{text-decoration:line-through;color:var(--muted)}
 
 .chip{
@@ -158,7 +159,7 @@ textarea.in{min-height:150px;font-family:var(--mono);font-size:12.5px;line-heigh
   padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));
 }
 .tab{
-  flex:1;max-width:150px;border:0;background:none;cursor:pointer;border-radius:10px;
+  flex:1;max-width:120px;border:0;background:none;cursor:pointer;border-radius:10px;
   padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);
 }
 .tab span{font-size:10.5px;font-weight:600;letter-spacing:.02em}
@@ -191,6 +192,17 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:22px 0}
      Pure: no network, no credentials, no login. You paste, it reads.
      ===================================================================== */
   /*__PARSER__*/
+
+  /* ======================= researched campus catalog ====================
+     Clubs, Wond'ry programs and research labs gathered from official
+     Vanderbilt sources, each carrying its source URL and an honest
+     confidence: VERIFIED = the official page was read directly, LIKELY =
+     official-domain search snippet, UNVERIFIED = secondary. Reference data,
+     identical for every viewer, so it lives in the page rather than in the
+     saved state. Deadlines are as researched on the date below — the UI says
+     to confirm them on the source before relying on one.
+     ===================================================================== */
+  var CATALOG = /*__CATALOG__*/;
 
   /* ===================== small date + format helpers ==================== */
   var DAY_ABBR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -288,6 +300,9 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:22px 0}
       f.push({ points: Math.min(20, it.weight * 0.6), label: it.weight >= 10 ? it.weight + "% of grade" : null });
     }
     if (it.kind === "EXAM") f.push({ points: 8, label: "exam — needs spaced prep, not one sitting" });
+    if (it.kind === "APPLICATION") {
+      f.push({ points: 10, label: "application deadline — there is no make-up for missing it" });
+    }
     var diff = course && course.difficulty ? course.difficulty : 3;
     f.push({ points: (diff - 3) * 2, label: diff >= 5 ? "historically difficult material" : null });
     if (it.status === "IN_PROGRESS") f.push({ points: 4, label: "already in progress — finish it" });
@@ -328,6 +343,18 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:22px 0}
       else if (d <= 3 && i.status === "NOT_STARTED" && (i.estMinutes || 0) >= 120)
         out.push({ sev: "warn", text: name + " needs " + fmtMinutes(i.estMinutes) + " and you have not started it" });
     });
+    // Opportunities close whether or not you remembered to track them.
+    catalogDeadlines().forEach(function (o) {
+      if (isTracked(st, o)) return;
+      var d = daysUntil(o.due, now);
+      if (d < 0 || d > 14) return;
+      out.push({
+        sev: d <= 3 ? "crit" : "warn",
+        text: o.n + " closes " + (d === 0 ? "today" : d === 1 ? "tomorrow" : "in " + d + " days") +
+          " and you are not tracking it — open Campus to add it or dismiss it."
+      });
+    });
+
     // Heavy-day detection: total estimated work landing on one calendar day.
     var byDay = {};
     st.items.forEach(function (i) {
@@ -344,6 +371,30 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:22px 0}
       }
     });
     return out;
+  }
+
+  /** Every catalog entry that carries a researched deadline, soonest first. */
+  function catalogDeadlines() {
+    var out = [];
+    CATALOG.clubs.concat(CATALOG.programs).forEach(function (o) {
+      if (!o.dl) return;
+      var d = new Date(o.dl + "T23:59:00");
+      if (!isNaN(d.getTime())) out.push({ n: o.n, due: d, o: o });
+    });
+    return out.sort(function (a, b) { return a.due - b.due; });
+  }
+  function isTracked(st, o) {
+    return st.items.some(function (i) { return i.ref === o.n; }) ||
+           (st.dismissed || []).indexOf(o.n) !== -1;
+  }
+  function trackOpportunity(o, due) {
+    state.items.push({
+      id: uid(), courseId: null, title: o.n + " — application",
+      kind: "APPLICATION", dueAt: due, estMinutes: 120, weight: 0,
+      status: "NOT_STARTED", ref: o.n, url: o.u || o.s || null
+    });
+    flash = { sev: "good", text: o.n + " is now in your ranked work. Confirm the deadline on their site — it was read on " + CATALOG.verifiedAt + "." };
+    touch(); render();
   }
 
   function courseOf(st, id) {
@@ -522,10 +573,15 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:22px 0}
       if (i.status === "DONE" || !i.dueAt) return false;
       var d = parseDue(i.dueAt); return d && daysUntil(d, now) <= 0;
     }).length;
+    var closing = catalogDeadlines().filter(function (o) {
+      var d = daysUntil(o.due, now);
+      return d >= 0 && d <= 7 && !isTracked(state, o);
+    }).length;
     var defs = [
       ["now", "Now", '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', due],
       ["week", "Week", '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>', 0],
       ["work", "Work", '<path d="M4 6h16M4 12h16M4 18h10"/>', 0],
+      ["campus", "Campus", '<path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 10.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5"/>', closing],
       ["setup", "Classes", '<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/>', 0]
     ];
     return h("nav", { class: "tabs" }, defs.map(function (d) {
@@ -685,6 +741,18 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:22px 0}
     });
     return frag([
       h("p", { class: "lede", style: "margin-bottom:18px", text: "Your week as it actually runs — classes from your schedule, with everything due that day underneath." }),
+      (function () {
+        var noTimes = state.courses.filter(function (c) { return !(c.meetings || []).length; });
+        if (!noTimes.length) return null;
+        return h("div", { class: "note warn", style: "margin-bottom:14px" }, [
+          document.createTextNode(
+            noTimes.length + " of your " + state.courses.length + " classes have no days or times yet (" +
+            noTimes.slice(0, 4).map(function (c) { return c.code; }).join(", ") +
+            (noTimes.length > 4 ? "…" : "") + "), so they are missing from this week."),
+          h("button", { class: "btn sm", style: "margin-left:10px", text: "Add times",
+            onclick: function () { tab = "setup"; window.scrollTo(0, 0); render(); } })
+        ]);
+      })(),
       h("div", { class: "stack" }, days.map(function (d) {
         var ms = meetingsOn(state, d);
         var offset = (d - todayDow + 7) % 7;
@@ -869,36 +937,99 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:22px 0}
   }
 
   function courseCard(c) {
-    return h("div", { class: "card" }, [
+    var ms = c.meetings || [];
+    var kids = [
       h("div", { class: "row-wrap" }, [
         h("span", { class: "dot", style: "background:" + c.color }),
         h("strong", { class: "grow", text: c.code + " — " + c.title }),
         h("button", { class: "btn sm danger", text: "Remove", onclick: function () {
+          if (!window.confirm("Remove " + c.code + " and anything filed under it?")) return;
           state.courses = state.courses.filter(function (x) { return x !== c; });
           state.items = state.items.filter(function (i) { return i.courseId !== c.id; });
           touch(); render();
         } })
       ]),
       h("div", { class: "why", style: "margin-top:5px", text: [
-        c.professor || "", c.credits ? c.credits + " credits" : "",
-        (c.meetings || []).length + " meeting" + ((c.meetings || []).length === 1 ? "" : "s")
-      ].filter(Boolean).join(" · ") }),
-      h("div", { style: "margin-top:8px" }, (c.meetings || []).map(function (m) {
-        return h("div", { class: "row", style: "font-size:12.5px;color:var(--ink-2)" }, [
-          h("span", { class: "mono", style: "min-width:34px", text: DAY_ABBR[m.dayOfWeek] }),
-          h("span", { class: "mono", text: fmtClock(m.startTime) + "–" + fmtClock(m.endTime) }),
-          h("span", { class: "grow", text: [m.location || "", m.kind !== "LECTURE" ? m.kind.toLowerCase() : ""].filter(Boolean).join(" · ") })
+        c.professor || "", c.credits ? c.credits + " credits" : ""
+      ].filter(Boolean).join(" · ") })
+    ];
+
+    // A course with no meetings is invisible on Week and Now — say so here,
+    // where it can be fixed, rather than letting the week look empty.
+    if (!ms.length) {
+      kids.push(h("p", { class: "note warn", style: "margin-top:8px",
+        text: "No days or times yet, so this class never appears on your week. Add its meetings below." }));
+    }
+
+    kids.push(h("div", { class: "stack-sm", style: "margin-top:9px" }, ms.map(function (m, mi) {
+      return h("div", { class: "row-wrap", style: "gap:6px" }, [
+        h("select", { class: "in", style: "width:auto;padding:6px 8px;font-size:13px",
+          onchange: function (e) { m.dayOfWeek = +e.target.value; touch(); render(); }
+        }, DAY_ABBR.map(function (d, di) {
+          return h("option", { value: di, selected: m.dayOfWeek === di, text: d });
+        })),
+        h("input", { class: "in", type: "time", style: "width:auto;padding:6px 8px;font-size:13px", value: m.startTime,
+          onchange: function (e) { if (e.target.value) { m.startTime = e.target.value; touch(); } } }),
+        h("input", { class: "in", type: "time", style: "width:auto;padding:6px 8px;font-size:13px", value: m.endTime,
+          onchange: function (e) { if (e.target.value) { m.endTime = e.target.value; touch(); } } }),
+        h("select", { class: "in", style: "width:auto;padding:6px 8px;font-size:13px",
+          onchange: function (e) { m.kind = e.target.value; touch(); }
+        }, ["LECTURE", "LAB", "DISCUSSION", "SEMINAR"].map(function (k) {
+          return h("option", { value: k, selected: (m.kind || "LECTURE") === k, text: k[0] + k.slice(1).toLowerCase() });
+        })),
+        h("input", { class: "in", style: "flex:1;min-width:110px;padding:6px 8px;font-size:13px",
+          placeholder: "Room", value: m.location || "",
+          onchange: function (e) { m.location = e.target.value.trim() || null; touch(); } }),
+        h("button", { class: "btn sm", text: "×", title: "Remove this meeting", onclick: function () {
+          c.meetings.splice(mi, 1); touch(); render();
+        } })
+      ]);
+    })));
+
+    kids.push(h("div", { class: "row-wrap", style: "margin-top:9px" }, [
+      h("button", { class: "btn sm" + (ms.length ? "" : " pri"), text: "+ Add a meeting", onclick: function () {
+        c.meetings = (c.meetings || []).concat([
+          { dayOfWeek: 1, startTime: "09:00", endTime: "09:50", kind: "LECTURE", location: null }
         ]);
+        touch(); render();
+      } }),
+      ms.length > 0 ? h("button", { class: "btn sm", title: "Copy this meeting's time onto other days",
+        text: "Repeat on MWF", onclick: function () {
+          var base = c.meetings[0];
+          [1, 3, 5].forEach(function (d) {
+            if (!c.meetings.some(function (m) { return m.dayOfWeek === d && m.startTime === base.startTime; })) {
+              c.meetings.push({ dayOfWeek: d, startTime: base.startTime, endTime: base.endTime, kind: base.kind, location: base.location });
+            }
+          });
+          c.meetings.sort(function (a, b) { return a.dayOfWeek - b.dayOfWeek || a.startTime.localeCompare(b.startTime); });
+          touch(); render();
+        } }) : null,
+      ms.length > 0 ? h("button", { class: "btn sm", text: "Repeat on TR", onclick: function () {
+          var base = c.meetings[0];
+          [2, 4].forEach(function (d) {
+            if (!c.meetings.some(function (m) { return m.dayOfWeek === d && m.startTime === base.startTime; })) {
+              c.meetings.push({ dayOfWeek: d, startTime: base.startTime, endTime: base.endTime, kind: base.kind, location: base.location });
+            }
+          });
+          c.meetings.sort(function (a, b) { return a.dayOfWeek - b.dayOfWeek || a.startTime.localeCompare(b.startTime); });
+          touch(); render();
+        } }) : null
+    ]));
+
+    kids.push(h("div", { class: "row-wrap", style: "margin-top:9px" }, [
+      h("label", { style: "margin:0;font-size:12px", text: "How hard is it?" }),
+      h("select", { class: "in", style: "width:auto;padding:5px 8px;font-size:13px",
+        onchange: function (e) { c.difficulty = +e.target.value; touch(); }
+      }, [1, 2, 3, 4, 5].map(function (n) {
+        return h("option", { value: n, selected: (c.difficulty || 3) === n, text: ["easy", "light", "normal", "hard", "brutal"][n - 1] });
       })),
-      h("div", { class: "row-wrap", style: "margin-top:9px" }, [
-        h("label", { style: "margin:0;font-size:12px", text: "How hard is it?" }),
-        h("select", { class: "in", style: "width:auto;padding:5px 8px;font-size:13px",
-          onchange: function (e) { c.difficulty = +e.target.value; touch(); }
-        }, [1, 2, 3, 4, 5].map(function (n) {
-          return h("option", { value: n, selected: (c.difficulty || 3) === n, text: ["easy", "light", "normal", "hard", "brutal"][n - 1] });
-        }))
-      ])
-    ]);
+      h("label", { style: "margin:0 0 0 8px;font-size:12px", text: "Credits" }),
+      h("input", { class: "in", type: "number", min: "0", max: "12", step: "0.5",
+        style: "width:70px;padding:5px 8px;font-size:13px", value: c.credits || "",
+        onchange: function (e) { c.credits = e.target.value ? +e.target.value : null; touch(); } })
+    ]));
+
+    return h("div", { class: "card" }, kids);
   }
 
   function viewReview() {
@@ -985,6 +1116,112 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:22px 0}
     touch(); tab = "week"; window.scrollTo(0, 0); render();
   }
 
+  /* ------------------------------ CAMPUS ------------------------------ */
+  var campusKind = "clubs";
+  var campusQ = "";
+
+  function viewCampus() {
+    var now = new Date();
+    var out = [];
+
+    var deadlines = catalogDeadlines().filter(function (o) { return daysUntil(o.due, now) >= 0; });
+    if (deadlines.length) {
+      out.push(h("div", { class: "section" }, [
+        h("div", { class: "section-head" }, [
+          h("h2", { text: "Closing soon" }),
+          h("span", { class: "count", text: "researched " + CATALOG.verifiedAt })
+        ]),
+        h("div", { class: "stack-sm" }, deadlines.map(function (d) {
+          var days = daysUntil(d.due, now);
+          var tracked = state.items.some(function (i) { return i.ref === d.n; });
+          var dismissed = (state.dismissed || []).indexOf(d.n) !== -1;
+          return h("div", { class: "act", "data-p": days <= 3 ? "CRITICAL" : days <= 7 ? "HIGH" : "MEDIUM", style: "cursor:default" }, [
+            h("div", { class: "grow" }, [
+              h("div", { class: "row-wrap" }, [
+                h("div", { class: "ttl grow", text: d.n }),
+                h("span", { class: "chip " + (days <= 3 ? "crit" : "warn"),
+                  text: days === 0 ? "closes today" : days === 1 ? "tomorrow" : days + " days" })
+              ]),
+              h("div", { class: "why", text: "Closes " + MONTHS[d.due.getMonth()] + " " + d.due.getDate() + ". " + (d.o.a || "") }),
+              h("div", { class: "row-wrap", style: "margin-top:9px" }, [
+                tracked
+                  ? h("span", { class: "chip good", text: "tracking" })
+                  : dismissed
+                    ? h("button", { class: "btn sm", text: "Track after all", onclick: function () {
+                        state.dismissed = (state.dismissed || []).filter(function (x) { return x !== d.n; });
+                        trackOpportunity(d.o, d.o.dl);
+                      } })
+                    : h("button", { class: "btn sm pri", text: "Track this", onclick: function () { trackOpportunity(d.o, d.o.dl); } }),
+                !tracked && !dismissed ? h("button", { class: "btn sm", text: "Not for me", onclick: function () {
+                  state.dismissed = (state.dismissed || []).concat([d.n]); touch(); render();
+                } }) : null,
+                d.o.s ? h("a", { class: "btn sm", href: d.o.s, target: "_blank", rel: "noreferrer", text: "Verify on their site" }) : null
+              ])
+            ])
+          ]);
+        }))
+      ]));
+    }
+
+    var tabs = [["clubs", "Clubs", CATALOG.clubs.length], ["programs", "Wond'ry", CATALOG.programs.length], ["labs", "Labs", CATALOG.labs.length]];
+    out.push(h("div", { class: "row-wrap", style: "margin-bottom:12px" }, tabs.map(function (t) {
+      return h("button", {
+        class: "btn sm" + (campusKind === t[0] ? " pri" : ""),
+        text: t[1] + " " + t[2],
+        onclick: function () { campusKind = t[0]; render(); }
+      });
+    })));
+
+    var search = h("input", { class: "in", placeholder: "Filter — finance, AI, consulting, neuro…", value: campusQ,
+      oninput: function (e) { campusQ = e.target.value; renderCampusList(listHost); } });
+    out.push(h("div", { style: "margin-bottom:12px" }, [search]));
+
+    var listHost = h("div", { class: "stack-sm" });
+    renderCampusList(listHost);
+    out.push(listHost);
+
+    out.push(h("p", { class: "why", style: "margin-top:18px", text:
+      "Gathered from official Vanderbilt sources on " + CATALOG.verifiedAt +
+      ". Each entry says how well it was confirmed — read cleanly means the official page itself was read; " +
+      "check this means it came from a search snippet. Confirm any deadline on the source before you rely on it." }));
+    return frag(out);
+  }
+
+  function renderCampusList(host) {
+    host.textContent = "";
+    var q = campusQ.trim().toLowerCase();
+    var rows = CATALOG[campusKind].filter(function (o) {
+      if (!q) return true;
+      return ((o.n || "") + " " + (o.c || "") + " " + (o.d || "") + " " + (o.p || "") + " " + (o.dept || ""))
+        .toLowerCase().indexOf(q) !== -1;
+    });
+    if (!rows.length) {
+      host.appendChild(h("div", { class: "card" }, [h("p", { class: "empty", text: "Nothing matches “" + campusQ + "”." })]));
+      return;
+    }
+    rows.forEach(function (o) {
+      var tracked = state.items.some(function (i) { return i.ref === o.n; });
+      host.appendChild(h("div", { class: "card" }, [
+        h("strong", { style: "display:block;line-height:1.3", text: o.n }),
+        h("div", { class: "row-wrap", style: "margin-top:6px" }, [
+          h("span", { class: "chip", text: String(o.c || "").replace(/_/g, " ").toLowerCase() }),
+          h("span", { class: "chip " + (o.cf === "VERIFIED" ? "good" : o.cf === "LIKELY" ? "warn" : ""),
+            text: o.cf === "VERIFIED" ? "read cleanly" : o.cf === "LIKELY" ? "check this" : "unconfirmed" }),
+          o.ug ? h("span", { class: "chip good", text: "takes undergrads" }) : null
+        ]),
+        o.p ? h("div", { class: "why", style: "margin-top:4px", text: o.p + (o.dept ? " · " + o.dept : "") }) : null,
+        h("p", { class: "why", style: "margin-top:5px", text: o.d || "" }),
+        o.a ? h("p", { class: "why", style: "margin-top:6px", text: (campusKind === "labs" ? "Next step: " : "How to get in: ") + o.a }) : null,
+        h("div", { class: "row-wrap", style: "margin-top:9px" }, [
+          o.u ? h("a", { class: "btn sm", href: o.u, target: "_blank", rel: "noreferrer", text: "Open" }) : null,
+          o.e ? h("a", { class: "btn sm", href: "mailto:" + o.e, text: "Email" }) : null,
+          o.dl && !tracked ? h("button", { class: "btn sm pri", text: "Track deadline", onclick: function () { trackOpportunity(o, o.dl); } }) : null,
+          tracked ? h("span", { class: "chip good", text: "tracking" }) : null
+        ])
+      ]));
+    });
+  }
+
   /* ============================== main render ========================== */
   function render() {
     root.textContent = "";
@@ -998,7 +1235,8 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:22px 0}
     root.appendChild(
       tab === "now" ? viewNow() :
       tab === "week" ? viewWeek() :
-      tab === "work" ? viewWork() : viewSetup()
+      tab === "work" ? viewWork() :
+      tab === "campus" ? viewCampus() : viewSetup()
     );
     root.appendChild(h("hr", { class: "sep" }));
     root.appendChild(h("p", { class: "why", style: "text-align:center;padding-bottom:10px", text:

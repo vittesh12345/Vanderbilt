@@ -269,3 +269,31 @@ describe("parseScheduleText — enrollment cart cards and edge cases", () => {
     expect(countCourseCodes("CS 1101, CS 1101, MATH 1301")).toBe(2);
   });
 });
+
+// Found from a real YES paste: ten courses came through with their titles,
+// but CHEM 1601L's instructor was recorded as "and DUS after first day of
+// class, 8/26/2026" — enrollment prose sitting next to the word "instructor".
+describe("instructor extraction rejects enrollment prose", () => {
+  const prof = (block: string) => parseScheduleText(block).courses[0]?.professor;
+
+  it("does not read a consent-and-deadline sentence as a name", () => {
+    expect(
+      prof("CHEM 1601L  General Chemistry Laboratory\nConsent of instructor and DUS after first day of class, 8/26/2026"),
+    ).toBeNull();
+  });
+
+  it("rejects anything containing a date or number", () => {
+    expect(prof("CHEM 1601L  Lab\nInstructor: TBD after 8/26/2026")).toBeNull();
+  });
+
+  it("rejects a sentence that merely mentions an instructor", () => {
+    expect(
+      prof("PC 1210  Leadership\nInstructor permission is required for all sections of this course this term"),
+    ).toBeNull();
+  });
+
+  it("still reads real instructor names", () => {
+    expect(prof("CS 2201  Program Design\nInstructor: A. Rivera")).toBe("A. Rivera");
+    expect(prof("MATH 2300  Calculus\nInstructor: Priya Raghunathan")).toBe("Priya Raghunathan");
+  });
+});
