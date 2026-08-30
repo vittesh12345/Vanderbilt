@@ -38,8 +38,13 @@ if (statePath) {
   let repaired = 0;
   for (const c of st.courses || []) {
     const v = c.professor;
-    if (typeof v === "string" && (/\d/.test(v) ||
+    // Match the specific failure, not merely "contains a digit" — a real name
+    // can carry a section marker. Enrollment prose opens with a connective,
+    // carries a date, or runs on like a sentence.
+    if (typeof v === "string" && (
         /^(?:and|or|of|the|for|with|consent|permission)\b/i.test(v) ||
+        /\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/.test(v) ||
+        /\b(19|20)\d{2}\b/.test(v) ||
         v.split(/\s+/).length > 6)) {
       c.professor = null;
       repaired++;
