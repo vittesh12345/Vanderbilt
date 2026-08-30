@@ -1,0 +1,521 @@
+// College OS — data model for all six phases.
+//
+// SQLite by default for zero-friction local dev; the schema deliberately avoids
+// provider-specific column types so it ports cleanly to Postgres (swap the
+// datasource provider). Enums are modeled as String + app-level unions (SQLite
+// has no native enum) — src/lib/types.ts holds the canonical value sets.
+// Fields ending in `Json` hold serialized JSON; helpers in src/lib/json.ts
+// parse them defensively.
+//
+// Phase 1 (Academic OS) actively uses: Profile, Semester, Course,
+// CourseMeeting, Assignment, Exam, WorkSession, CalendarEvent, Topic,
+// SyllabusUpload, Conflict, DismissedAlert, Goal, Task, TimeEstimateRecord.
+// Phases 2–5 tables (Club*, ResearchLab*, CareerItem, Skill, StartupItem,
+// MonitoredSource) are defined now so later phases are additive, not
+// rewrites.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identity & goals
+// ---------------------------------------------------------------------------
+
+// Single-user system. One row.
+model Profile {
+  id            String   @id @default(cuid())
+  name          String
+  email         String?
+  school        String   @default("Vanderbilt University")
+  gradYear      Int?
+  majorsJson    String   @default("[]") // string[]
+  interestsJson String   @default("[]") // string[] e.g. ["finance","AI","startups"]
+  // Personal priority hierarchy — used by the priority engine to weight tasks.
+  // { tier1: string[], tier2: string[], tier3: string[] } of category names.
+  tiersJson     String   @default("{}")
+  // Weekly hour budget the scheduler may plan against (outside class).
+  weeklyHours   Int      @default(40)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Goal {
+  id          String    @id @default(cuid())
+  category    String // ACADEMIC | CAREER | CLUB | RESEARCH | STARTUP | PERSONAL
+  title       String
+  description String?
+  tier        Int       @default(2) // 1 = highest personal priority
+  targetDate  DateTime?
+  status      String    @default("ACTIVE") // ACTIVE | ACHIEVED | DROPPED
+  progress    Int       @default(0) // 0..100
+  // [{title, done, date?}]
+  milestonesJson String @default("[]")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([category])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Academic core (Phase 1)
+// ---------------------------------------------------------------------------
+
+model Semester {
+  id        String   @id @default(cuid())
+  name      String // "Fall 2026"
+  startDate DateTime
+  endDate   DateTime
+  isCurrent Boolean  @default(false)
+  courses   Course[]
+}
+
+model Course {
+  id             String  @id @default(cuid())
+  semesterId     String
+  semester       Semester @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  code           String // "CS 1101"
+  title          String
+  professor      String?
+  professorEmail String?
+  location       String?
+  credits        Float   @default(3)
+  color          String  @default("#CFAE70") // calendar/dashboard accent
+  difficulty     Int     @default(3) // 1..5, self-assessed or inferred
+  targetGrade    String?
+  currentGrade   String?
+  // [{category:"Exams", weight:40}, ...] — must be flagged if syllabus and
+  // LMS disagree (Conflict rows), never silently overwritten.
+  gradeWeightsJson String @default("[]")
+  // [{title, author?, required:bool, notes?}]
+  materialsJson    String @default("[]")
+  // [{label, url, kind:"LMS"|"EXTERNAL"|"GITHUB"|"DOC"|"OTHER", authRequired:bool, notes?}]
+  linksJson        String @default("[]")
+  // [{day:"Tue", start:"14:00", end:"15:30", location?, note?}] — professor office hours
+  officeHoursJson  String @default("[]")
+  syllabusText     String? // raw text of the most recent committed syllabus
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  meetings        CourseMeeting[]
+  assignments     Assignment[]
+  exams           Exam[]
+  topics          Topic[]
+  workSessions    WorkSession[]
+  syllabusUploads SyllabusUpload[]
+  events          CalendarEvent[]
+
+  @@index([semesterId])
+}
+
+// A recurring weekly class meeting (lecture / lab / discussion).
+model CourseMeeting {
+  id        String @id @default(cuid())
+  courseId  String
+  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  dayOfWeek Int // 0 = Sunday ... 6 = Saturday
+  startTime String // "10:00" 24h local
+  endTime   String // "11:15"
+  location  String?
+  kind      String @default("LECTURE") // LECTURE | LAB | DISCUSSION | SEMINAR
+
+  @@index([courseId])
+}
+
+model Assignment {
+  id          String    @id @default(cuid())
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  kind        String    @default("HOMEWORK") // HOMEWORK | PROBLEM_SET | ESSAY | PROJECT | READING | LAB | DISCUSSION | PRESENTATION | OTHER
+  description String?
+  dueAt       DateTime?
+  source      String    @default("MANUAL") // MANUAL | SYLLABUS | BRIGHTSPACE | EXTERNAL | AI
+  sourceUrl   String?
+  status      String    @default("NOT_STARTED") // NOT_STARTED | IN_PROGRESS | BLOCKED | SUBMITTED | COMPLETED (overdue is derived from dueAt, never stored)
+  difficulty  Int       @default(3) // 1..5
+  importance  Int       @default(3) // 1..5
+  gradeWeight Float? // percent of the final grade this single item is worth
+  estMinutes  Int? // estimated time (midpoint)
+  estMinutesMax Int? // upper bound when uncertain → shows "60–90 min"
+  actualMinutes Int? // recorded after completion; feeds estimate calibration
+  // ids of assignments that must be finished first
+  dependsOnJson String  @default("[]")
+  recommendedStartAt DateTime?
+  completedAt DateTime?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workSessions WorkSession[]
+
+  @@index([courseId])
+  @@index([dueAt])
+  @@index([status])
+}
+
+model Exam {
+  id        String    @id @default(cuid())
+  courseId  String
+  course    Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title     String // "Midterm 1"
+  kind      String    @default("MIDTERM") // MIDTERM | FINAL | QUIZ | TEST
+  startAt   DateTime
+  endAt     DateTime?
+  location  String?
+  weight    Float? // percent of final grade
+  // string[] of topics/lectures/chapters in scope
+  topicsJson String   @default("[]")
+  source    String    @default("MANUAL")
+  notes     String?
+  // Set once a study plan has been generated so we don't re-plan silently.
+  planGeneratedAt DateTime?
+  planRationale   String? // WHY this much studying — engine/AI explanation
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  workSessions WorkSession[]
+
+  @@index([courseId])
+  @@index([startAt])
+}
+
+// A planned block of work: assignment progress, exam study, class prep, or
+// spaced review. The scheduler and study planner create these; the calendar
+// and Today view surface them; completing one updates estimate calibration.
+model WorkSession {
+  id           String    @id @default(cuid())
+  date         DateTime // the day the session is planned for (midnight local)
+  startTime    String? // "19:00" — optional; unset = "sometime that day"
+  minutes      Int
+  kind         String // ASSIGNMENT_WORK | EXAM_STUDY | CLASS_PREP | REVIEW
+  focus        String // exactly WHAT to do: "Review lectures 1–3", "Ch. 4 pp. 82–101"
+  rationale    String? // why this session exists / why this length
+  completed    Boolean   @default(false)
+  completedAt  DateTime?
+  assignmentId String?
+  assignment   Assignment? @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  examId       String?
+  exam         Exam?       @relation(fields: [examId], references: [id], onDelete: Cascade)
+  courseId     String?
+  course       Course?     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+
+  @@index([date])
+  @@index([assignmentId])
+  @@index([examId])
+}
+
+// Unified calendar for events that are not derived from other tables
+// (class meetings, exams, due dates and work sessions are merged into
+// calendar views at query time — single source of truth, no duplication).
+model CalendarEvent {
+  id          String    @id @default(cuid())
+  title       String
+  category    String // ACADEMIC | CLUB | CAREER | RESEARCH | STARTUP | PERSONAL
+  startAt     DateTime
+  endAt       DateTime?
+  location    String?
+  description String?
+  url         String?
+  source      String    @default("MANUAL") // MANUAL | ANCHORLINK | VU_CALENDAR | CLUB_SITE | AI | OTHER
+  sourceUrl   String?
+  lastVerifiedAt DateTime?
+  courseId    String?
+  course      Course?   @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([startAt])
+  @@index([category])
+}
+
+// Lightweight knowledge-retention tracker: one row per course topic.
+model Topic {
+  id             String    @id @default(cuid())
+  courseId       String
+  course         Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  name           String
+  mastery        String    @default("INTRODUCED") // INTRODUCED | REVIEWED | PRACTICED | MASTERED | NEEDS_REVIEW
+  introducedAt   DateTime  @default(now())
+  lastReviewedAt DateTime?
+  // Free-text "what I didn't understand" entries, newest first. string[]
+  confusionsJson String    @default("[]")
+
+  @@index([courseId])
+  @@index([mastery])
+}
+
+// A syllabus ingestion: raw text in, structured extraction out, then a human
+// review step commits it into Course/Assignment/Exam rows (+ Conflict rows
+// when the extraction disagrees with existing data).
+model SyllabusUpload {
+  id             String   @id @default(cuid())
+  courseId       String
+  course         Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  filename       String?
+  rawText        String
+  // The full structured extraction (SyllabusExtraction in src/lib/types.ts).
+  extractionJson String   @default("{}")
+  aiUsed         Boolean  @default(false)
+  status         String   @default("PARSED") // PARSED | COMMITTED | DISCARDED
+  createdAt      DateTime @default(now())
+  committedAt    DateTime?
+
+  @@index([courseId])
+}
+
+// Two sources disagree. Never silently pick one — surface it.
+model Conflict {
+  id          String   @id @default(cuid())
+  entityType  String // COURSE | ASSIGNMENT | EXAM | EVENT | CLUB | OTHER
+  entityId    String?
+  field       String // e.g. "startAt", "gradeWeights", "meetingTime"
+  description String // human-readable: "Midterm date differs between syllabus and Brightspace"
+  sourceA     String // "Syllabus (uploaded Aug 28)"
+  valueA      String
+  sourceB     String // "Existing record (Brightspace import)"
+  valueB      String
+  suggestion  String? // "Verify with professor."
+  status      String   @default("OPEN") // OPEN | RESOLVED
+  resolution  String?
+  createdAt   DateTime @default(now())
+  resolvedAt  DateTime?
+
+  @@index([status])
+}
+
+// Alerts are computed deterministically from live data (src/lib/engine/alerts.ts)
+// so they are never stale; only dismissals persist, keyed by the alert's
+// stable key (kind + entity + date bucket).
+model DismissedAlert {
+  id          String   @id @default(cuid())
+  alertKey    String   @unique
+  dismissedAt DateTime @default(now())
+}
+
+// Generic non-course to-do (career task, errand, startup action item, ...).
+// Assignments stay in Assignment; this is everything else the Top-5 engine
+// should still rank.
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  category    String    @default("PERSONAL") // ACADEMIC | CLUB | CAREER | RESEARCH | STARTUP | PERSONAL
+  description String?
+  dueAt       DateTime?
+  estMinutes  Int?
+  importance  Int       @default(3) // 1..5
+  status      String    @default("NOT_STARTED") // NOT_STARTED | IN_PROGRESS | BLOCKED | COMPLETED
+  goalId      String?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([dueAt])
+  @@index([status])
+  @@index([category])
+}
+
+// Estimate-vs-actual history → calibration factor per course/kind so future
+// estimates improve ("your problem sets run 1.3× the estimate").
+model TimeEstimateRecord {
+  id           String   @id @default(cuid())
+  entityType   String // ASSIGNMENT | TASK | SESSION
+  entityId     String
+  courseId     String?
+  kind         String? // assignment kind for grouping
+  estimated    Int // minutes
+  actual       Int // minutes
+  recordedAt   DateTime @default(now())
+
+  @@index([courseId])
+}
+
+// ---------------------------------------------------------------------------
+// Phase 2 — Vanderbilt intelligence (clubs, events, monitoring)
+// ---------------------------------------------------------------------------
+
+model Club {
+  id           String    @id @default(cuid())
+  name         String
+  category     String // FINANCE | CONSULTING | TECH | ENTREPRENEURSHIP | AI | BUSINESS | VC_PE | PRODUCT | OTHER
+  description  String?
+  website      String?
+  applicationUrl String?
+  meetingInfo  String? // "Tuesdays 7pm, Featheringill 134"
+  recruitment  String? // free-text recruitment-period notes
+  interviewProcess String?
+  requirements String?
+  leadership   String? // leadership-track notes
+  contact      String?
+  priority     String    @default("UNRANKED") // HIGH | MEDIUM | LOW | UNRANKED
+  priorityReason String?
+  membership   String    @default("PROSPECT") // PROSPECT | INTERESTED | MEMBER | LEADER | ALUMNI | NOT_PURSUING
+  source       String?
+  lastVerifiedAt DateTime?
+  confidence   String    @default("UNVERIFIED") // VERIFIED | LIKELY | UNVERIFIED
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  applications ClubApplication[]
+
+  @@index([category])
+  @@index([priority])
+}
+
+model ClubApplication {
+  id         String    @id @default(cuid())
+  clubId     String
+  club       Club      @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  cycle      String? // "Fall 2026"
+  opensAt    DateTime?
+  deadlineAt DateTime?
+  interviewAt DateTime?
+  decisionAt DateTime?
+  status     String    @default("NOT_OPEN") // NOT_OPEN | OPEN | APPLYING | SUBMITTED | INTERVIEW | ACCEPTED | REJECTED
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([clubId])
+  @@index([deadlineAt])
+}
+
+// Web-monitoring layer: pages checked periodically; notify only on meaningful
+// change (hash diff + summarizer). See docs/ARCHITECTURE.md § Web monitoring.
+model MonitoredSource {
+  id              String    @id @default(cuid())
+  url             String    @unique
+  label           String
+  kind            String // CLUB | VU_CALENDAR | RESEARCH | STARTUP | CAREER | COURSE | OTHER
+  checkEveryHours Int       @default(24)
+  active          Boolean   @default(true)
+  lastCheckedAt   DateTime?
+  lastContentHash String?
+  // Normalized text of the last snapshot (capped) — the diff baseline, so a
+  // change summary compares against what was actually there before.
+  lastContentText String?
+  lastChangeAt    DateTime?
+  lastChangeSummary String?
+  createdAt       DateTime  @default(now())
+
+  @@index([kind])
+  @@index([active])
+}
+
+// ---------------------------------------------------------------------------
+// Phase 3 — Career OS
+// ---------------------------------------------------------------------------
+
+model CareerItem {
+  id        String    @id @default(cuid())
+  kind      String // APPLICATION | EVENT | NETWORKING | INTERVIEW | RECRUITER | OTHER
+  title     String
+  company   String?
+  track     String? // FINANCE | CONSULTING | TECH | OTHER
+  at        DateTime? // event time or deadline
+  status    String    @default("OPEN") // OPEN | IN_PROGRESS | SUBMITTED | SCHEDULED | DONE | DROPPED
+  url       String?
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([at])
+  @@index([kind])
+}
+
+model Skill {
+  id           String    @id @default(cuid())
+  name         String
+  category     String // FINANCE | CONSULTING | TECH | STARTUP | GENERAL
+  currentLevel Int       @default(1) // 1..5
+  targetLevel  Int       @default(3)
+  nextAction   String?
+  resource     String?
+  timeRequired String? // "2h/week"
+  deadline     DateTime?
+  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime  @default(now())
+
+  @@index([category])
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4 — Research OS
+// ---------------------------------------------------------------------------
+
+model ResearchLab {
+  id             String    @id @default(cuid())
+  professor      String
+  labName        String?
+  department     String?
+  area           String? // research area summary
+  website        String?
+  contactEmail   String?
+  acceptsUndergrads String @default("UNKNOWN") // YES | NO | UNKNOWN
+  applicationProcess String?
+  applicationDeadline DateTime?
+  skillsRequired String?
+  fitReason      String? // WHY THIS LAB / WHY I'M A FIT
+  learnFirst     String? // WHAT I SHOULD LEARN FIRST
+  couldOffer     String? // WHAT I COULD OFFER
+  approach       String? // HOW TO APPROACH THE PROFESSOR
+  nextAction     String?
+  status         String    @default("RESEARCHING") // RESEARCHING | POTENTIAL_FIT | CONTACTED | FOLLOW_UP | INTERVIEW | ACCEPTED | NOT_A_FIT
+  source         String?
+  confidence     String    @default("UNVERIFIED") // VERIFIED | LIKELY | UNVERIFIED
+  lastVerifiedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  outreach ResearchOutreach[]
+
+  @@index([status])
+}
+
+model ResearchOutreach {
+  id         String    @id @default(cuid())
+  labId      String
+  lab        ResearchLab @relation(fields: [labId], references: [id], onDelete: Cascade)
+  kind       String    @default("EMAIL") // EMAIL | MEETING | FOLLOW_UP | INTERVIEW
+  at         DateTime
+  followUpAt DateTime?
+  notes      String?
+  createdAt  DateTime  @default(now())
+
+  @@index([labId])
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5 — Startup OS
+// ---------------------------------------------------------------------------
+
+model StartupItem {
+  id        String    @id @default(cuid())
+  kind      String // TASK | MILESTONE | FUNDING | COMPETITION | PROGRAM | MENTOR | INVESTOR_OUTREACH | CUSTOMER_OUTREACH | LEGAL | METRIC
+  title     String
+  details   String?
+  provider  String? // "The Wond'ry", "Sullivan Family Ideator", ...
+  eligibility String?
+  funding   String?
+  timeCommitment String?
+  relevance String? // why it matters for MY startup
+  nextAction String?
+  dueAt     DateTime?
+  status    String    @default("OPEN") // OPEN | IN_PROGRESS | DONE | DROPPED | WATCHING
+  url       String?
+  source    String?
+  lastVerifiedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([kind])
+  @@index([dueAt])
+}

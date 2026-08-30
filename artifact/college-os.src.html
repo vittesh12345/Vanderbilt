@@ -1,0 +1,1269 @@
+<title>College OS</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style id="app-css">
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+
+:root{
+  --ground:#f6f4ef; --surface:#fffefb; --surface-2:#f0ece2;
+  --ink:#191712; --ink-2:#4c4638; --muted:#7c7565; --line:#e3ddcf; --line-2:#d3cbb8;
+  --gold:#8a6a24; --gold-soft:#cfae70; --gold-wash:#f7efdc;
+  --good:#2c6e49; --warn:#a3670f; --crit:#a83a2c;
+  --good-wash:#e6f1e9; --warn-wash:#faeed8; --crit-wash:#f9e6e2;
+  --shadow:0 1px 2px rgba(28,24,12,.06),0 6px 18px -12px rgba(28,24,12,.25);
+  --display:"Bricolage Grotesque","Public Sans",system-ui,sans-serif;
+  --body:"Public Sans",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#131109; --surface:#1d1a13; --surface-2:#26221a;
+    --ink:#f0ebdd; --ink-2:#c9c2af; --muted:#98917f; --line:#302b20; --line-2:#3d3728;
+    --gold:#d9b978; --gold-soft:#8a6f36; --gold-wash:#2a2416;
+    --good:#79c79b; --warn:#e0ad5c; --crit:#e88472;
+    --good-wash:#1a2a20; --warn-wash:#2c2413; --crit-wash:#2e1c18;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -14px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#131109; --surface:#1d1a13; --surface-2:#26221a;
+  --ink:#f0ebdd; --ink-2:#c9c2af; --muted:#98917f; --line:#302b20; --line-2:#3d3728;
+  --gold:#d9b978; --gold-soft:#8a6f36; --gold-wash:#2a2416;
+  --good:#79c79b; --warn:#e0ad5c; --crit:#e88472;
+  --good-wash:#1a2a20; --warn-wash:#2c2413; --crit-wash:#2e1c18;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -14px rgba(0,0,0,.8);
+}
+
+body{
+  background:var(--ground); color:var(--ink); font-family:var(--body);
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  padding-bottom:calc(72px + env(safe-area-inset-bottom,0px));
+}
+#root{max-width:620px;margin:0 auto;padding:0 16px}
+@media (min-width:720px){ #root{max-width:760px} }
+
+h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.02em;margin:0;text-wrap:balance}
+h1{font-size:24px;line-height:1.15}
+h2{font-size:15px;font-weight:700;letter-spacing:.01em}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--gold)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+
+/* ---------- header ---------- */
+.top{
+  position:sticky;top:0;z-index:20;background:var(--ground);
+  display:flex;align-items:flex-end;gap:12px;
+  padding:18px 0 12px;border-bottom:1px solid var(--line);margin-bottom:16px;
+}
+.top .when{flex:1;min-width:0}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.savebtn{
+  border:1px solid var(--gold);background:var(--gold);color:var(--ground);
+  border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;
+}
+.savebtn:active{transform:translateY(1px)}
+.saveflag{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;padding-bottom:6px}
+
+/* ---------- cards ---------- */
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:14px;box-shadow:var(--shadow);
+}
+.stack{display:flex;flex-direction:column;gap:12px}
+.stack-sm{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:10px}
+.row-wrap{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.grow{flex:1;min-width:0}
+.section{display:flex;flex-direction:column;gap:10px;margin-bottom:26px}
+.section-head{display:flex;align-items:baseline;gap:10px}
+.section-head h2{color:var(--ink)}
+.count{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+/* ---------- action items ---------- */
+.act{
+  display:flex;gap:12px;background:var(--surface);border:1px solid var(--line);
+  border-left:3px solid var(--line-2);border-radius:12px;padding:12px 13px;
+  box-shadow:var(--shadow);text-align:left;width:100%;cursor:pointer;
+}
+.act[data-p="CRITICAL"]{border-left-color:var(--crit)}
+.act[data-p="HIGH"]{border-left-color:var(--gold)}
+.act[data-p="MEDIUM"]{border-left-color:var(--gold-soft)}
+.act .rank{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--muted);padding-top:2px;min-width:14px}
+.act .ttl{font-weight:600;line-height:1.3}
+.why{font-size:12.5px;color:var(--muted);line-height:1.45}
+.act .why{margin-top:3px}
+.act.done .ttl{text-decoration:line-through;color:var(--muted)}
+
+.chip{
+  display:inline-block;font-family:var(--mono);font-size:10px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;
+  border:1px solid var(--line-2);color:var(--muted);white-space:nowrap;
+}
+.chip.crit{background:var(--crit-wash);border-color:transparent;color:var(--crit)}
+.chip.warn{background:var(--warn-wash);border-color:transparent;color:var(--warn)}
+.chip.good{background:var(--good-wash);border-color:transparent;color:var(--good)}
+.chip.gold{background:var(--gold-wash);border-color:transparent;color:var(--gold)}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+
+/* ---------- class rows ---------- */
+.cls{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+.cls:last-child{border-bottom:0}
+.cls .t{font-family:var(--mono);font-size:12px;color:var(--ink-2);min-width:62px;padding-top:1px;font-variant-numeric:tabular-nums}
+.cls .n{font-weight:600;font-size:14px}
+.cls .r{font-size:12px;color:var(--muted)}
+.cls.now{background:var(--gold-wash);margin:0 -13px;padding:9px 13px;border-radius:8px;border-bottom:0}
+
+/* ---------- week grid ---------- */
+.day{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:12px 13px;box-shadow:var(--shadow)}
+.day.today{border-color:var(--gold);border-width:1.5px}
+.day h3{font-family:var(--display);font-size:13px;font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline}
+.day h3 span{font-family:var(--mono);font-size:10.5px;color:var(--muted);font-weight:400;letter-spacing:.06em}
+.empty{color:var(--muted);font-size:13px;font-style:italic}
+
+/* ---------- forms ---------- */
+label{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px}
+.in{
+  width:100%;background:var(--surface);border:1px solid var(--line-2);border-radius:9px;
+  padding:9px 11px;font-size:15px;
+}
+.in:focus{border-color:var(--gold);outline:none}
+textarea.in{min-height:150px;font-family:var(--mono);font-size:12.5px;line-height:1.6;resize:vertical}
+.btn{
+  border:1px solid var(--line-2);background:var(--surface);border-radius:9px;
+  padding:9px 14px;font-size:13.5px;font-weight:600;cursor:pointer;
+}
+.btn:active{transform:translateY(1px)}
+.btn.pri{background:var(--gold);border-color:var(--gold);color:var(--ground)}
+.btn.sm{padding:5px 10px;font-size:12px;border-radius:7px}
+.btn.danger{color:var(--crit);border-color:var(--crit)}
+.btn:disabled{opacity:.45;cursor:default}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+/* ---------- notices ---------- */
+.note{border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.45}
+.note.warn{background:var(--warn-wash);color:var(--warn)}
+.note.crit{background:var(--crit-wash);color:var(--crit)}
+.note.good{background:var(--good-wash);color:var(--good)}
+.note.plain{background:var(--surface-2);color:var(--ink-2)}
+
+/* ---------- tabs ---------- */
+.tabs{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  display:flex;justify-content:center;gap:2px;
+  background:color-mix(in srgb,var(--ground) 92%,transparent);
+  backdrop-filter:blur(12px);border-top:1px solid var(--line);
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));
+}
+.tab{
+  flex:1;max-width:120px;border:0;background:none;cursor:pointer;border-radius:10px;
+  padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);
+}
+.tab span{font-size:10.5px;font-weight:600;letter-spacing:.02em}
+.tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-current="true"]{color:var(--gold);background:var(--gold-wash)}
+.badge{position:absolute;transform:translate(12px,-4px);background:var(--crit);color:#fff;
+  font-family:var(--mono);font-size:9px;font-weight:600;border-radius:999px;padding:1px 4px;line-height:1.4}
+
+.rev{border:1px solid var(--line);border-radius:11px;padding:11px;background:var(--surface)}
+.rev.off{opacity:.45}
+.src{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:pre-wrap;word-break:break-word;
+  background:var(--surface-2);border-radius:7px;padding:7px;margin-top:7px;max-height:110px;overflow:auto}
+.lede{color:var(--ink-2);font-size:14px;line-height:1.55}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+hr.sep{border:0;border-top:1px solid var(--line);margin:22px 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div id="root"></div>
+
+<script id="app-state" type="application/json">{"v":1,"term":"","courses":[],"items":[],"updatedAt":null}</script>
+
+<script id="app-js">
+(function () {
+  "use strict";
+
+  /* =====================================================================
+     YES / VSTAR schedule parser — transpiled verbatim from the College OS
+     repo (src/lib/parsers/schedule.ts), where it is covered by 23 tests.
+     Pure: no network, no credentials, no login. You paste, it reads.
+     ===================================================================== */
+  /*__PARSER__*/
+
+  /* ======================= researched campus catalog ====================
+     Clubs, Wond'ry programs and research labs gathered from official
+     Vanderbilt sources, each carrying its source URL and an honest
+     confidence: VERIFIED = the official page was read directly, LIKELY =
+     official-domain search snippet, UNVERIFIED = secondary. Reference data,
+     identical for every viewer, so it lives in the page rather than in the
+     saved state. Deadlines are as researched on the date below — the UI says
+     to confirm them on the source before relying on one.
+     ===================================================================== */
+  var CATALOG = /*__CATALOG__*/;
+
+  /* ===================== small date + format helpers ==================== */
+  var DAY_ABBR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  var DAY_FULL = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+  function startOfDay(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
+  function daysUntil(to, from) {
+    return Math.round((startOfDay(to) - startOfDay(from)) / 86400000);
+  }
+  function addDays(d, n) { var x = new Date(d); x.setDate(x.getDate() + n); return x; }
+  function fmtMinutes(m) {
+    if (!m || m <= 0) return "0m";
+    var h = Math.floor(m / 60), r = m % 60;
+    if (!h) return r + "m";
+    return r ? h + "h " + r + "m" : h + "h";
+  }
+  function fmtClock(hm) {
+    var p = String(hm).split(":"), h = +p[0], m = p[1];
+    var mer = h >= 12 ? "pm" : "am", h12 = h % 12 === 0 ? 12 : h % 12;
+    return h12 + ":" + m + mer;
+  }
+  function minutesOf(hm) { var p = String(hm).split(":"); return (+p[0]) * 60 + (+p[1]); }
+  function ymd(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getDate()).padStart(2, "0");
+  }
+  function parseDue(v) {
+    if (!v) return null;
+    var d = /^\d{4}-\d{2}-\d{2}$/.test(v) ? new Date(v + "T23:59:00") : new Date(v);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function dueLabel(due, now) {
+    var n = daysUntil(due, now);
+    if (n < -1) return Math.abs(n) + " days overdue";
+    if (n === -1) return "overdue since yesterday";
+    if (n === 0) return "due today";
+    if (n === 1) return "due tomorrow";
+    if (n < 7) return "due " + DAY_FULL[due.getDay()];
+    return "due " + MONTHS[due.getMonth()].slice(0, 3) + " " + due.getDate();
+  }
+  function uid() { return Math.random().toString(36).slice(2, 10); }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  var COURSE_COLORS = ["#2a78d6","#eb6834","#1baf7a","#eda100","#e87ba4","#008300","#4a3aa7","#e34948"];
+  function nextColor(used) {
+    for (var i = 0; i < COURSE_COLORS.length; i++) {
+      if (used.indexOf(COURSE_COLORS[i]) === -1) return COURSE_COLORS[i];
+    }
+    return COURSE_COLORS[used.length % COURSE_COLORS.length];
+  }
+
+  /* ==================== the "what should I do?" engine ==================
+     Ported from src/lib/engine/priority.ts. Deliberately NOT a due-date
+     sort: the required daily pace to finish on time is scored alongside
+     urgency, so an 8-hour project due in 3 days outranks a 15-minute
+     reading due tomorrow. The pace term is requiredDaily/6, so it only
+     overtakes a nearer deadline once finishing on time really does demand
+     daily hours. Every item carries the reason it ranked where it did.
+     ===================================================================== */
+  function urgencyPoints(days) {
+    if (days < 0) return { points: 45, label: "overdue" };
+    if (days === 0) return { points: 40, label: "due today" };
+    if (days === 1) return { points: 34, label: "due tomorrow" };
+    if (days <= 2) return { points: 28, label: "due in 2 days" };
+    if (days <= 3) return { points: 22, label: "due in 3 days" };
+    if (days <= 5) return { points: 14, label: "due this week" };
+    if (days <= 7) return { points: 8, label: "due within a week" };
+    if (days <= 14) return { points: 3, label: null };
+    return { points: 1, label: null };
+  }
+
+  function scoreItem(it, course, now) {
+    var f = [];
+    var due = parseDue(it.dueAt);
+    var days = due ? daysUntil(due, now) : null;
+    f.push(days === null ? { points: 2, label: null } : urgencyPoints(days));
+
+    if (it.estMinutes && days !== null && days >= 0) {
+      var daysLeft = Math.max(1, days);
+      var requiredDaily = it.estMinutes / daysLeft;
+      var pts = Math.min(30, requiredDaily / 6);
+      f.push({
+        points: pts,
+        label: pts >= 8
+          ? fmtMinutes(it.estMinutes) + " of work → needs ~" + fmtMinutes(Math.round(requiredDaily)) + "/day"
+          : null
+      });
+    }
+    if (it.weight > 0) {
+      f.push({ points: Math.min(20, it.weight * 0.6), label: it.weight >= 10 ? it.weight + "% of grade" : null });
+    }
+    if (it.kind === "EXAM") f.push({ points: 8, label: "exam — needs spaced prep, not one sitting" });
+    if (it.kind === "APPLICATION") {
+      f.push({ points: 10, label: "application deadline — there is no make-up for missing it" });
+    }
+    var diff = course && course.difficulty ? course.difficulty : 3;
+    f.push({ points: (diff - 3) * 2, label: diff >= 5 ? "historically difficult material" : null });
+    if (it.status === "IN_PROGRESS") f.push({ points: 4, label: "already in progress — finish it" });
+    if (it.status === "BLOCKED") f.push({ points: -50, label: "blocked" });
+
+    var score = f.reduce(function (s, x) { return s + x.points; }, 0);
+    var priority = score >= 55 ? "CRITICAL" : score >= 38 ? "HIGH" : score >= 22 ? "MEDIUM" : "LOW";
+    var pos = f.filter(function (x) { return x.label && x.points > 0; })
+               .sort(function (a, b) { return b.points - a.points; })
+               .map(function (x) { return x.label; });
+    var neg = f.filter(function (x) { return x.label && x.points < 0; });
+    var reason = (pos.length ? pos.slice(0, 3).join(" + ") : "routine work") +
+      (neg.length ? " (" + neg.map(function (x) { return x.label; }).join(", ") + ")" : "");
+
+    return { item: it, course: course, score: Math.round(score * 10) / 10, priority: priority, reason: reason, due: due };
+  }
+
+  function rankOpen(st, now) {
+    return st.items
+      .filter(function (i) { return i.status !== "DONE"; })
+      .map(function (i) { return scoreItem(i, courseOf(st, i.courseId), now); })
+      .sort(function (a, b) { return b.score - a.score; });
+  }
+
+  /* Derived alerts — never stored, always recomputed. */
+  function computeAlerts(st, now) {
+    var out = [];
+    st.items.forEach(function (i) {
+      if (i.status === "DONE") return;
+      var due = parseDue(i.dueAt);
+      if (!due) return;
+      var d = daysUntil(due, now);
+      var c = courseOf(st, i.courseId);
+      var name = (c ? c.code + " " : "") + i.title;
+      if (d < 0) out.push({ sev: "crit", text: name + " is " + dueLabel(due, now) });
+      else if (d === 0) out.push({ sev: "crit", text: name + " is due today" });
+      else if (d === 1) out.push({ sev: "warn", text: name + " is due tomorrow" });
+      else if (d <= 3 && i.status === "NOT_STARTED" && (i.estMinutes || 0) >= 120)
+        out.push({ sev: "warn", text: name + " needs " + fmtMinutes(i.estMinutes) + " and you have not started it" });
+    });
+    // Opportunities close whether or not you remembered to track them.
+    catalogDeadlines().forEach(function (o) {
+      if (isTracked(st, o)) return;
+      var d = daysUntil(o.due, now);
+      if (d < 0 || d > 14) return;
+      out.push({
+        sev: d <= 3 ? "crit" : "warn",
+        text: o.n + " closes " + (d === 0 ? "today" : d === 1 ? "tomorrow" : "in " + d + " days") +
+          " and you are not tracking it — open Campus to add it or dismiss it."
+      });
+    });
+
+    // Heavy-day detection: total estimated work landing on one calendar day.
+    var byDay = {};
+    st.items.forEach(function (i) {
+      if (i.status === "DONE" || !i.dueAt) return;
+      var due = parseDue(i.dueAt); if (!due) return;
+      var d = daysUntil(due, now);
+      if (d < 0 || d > 10) return;
+      byDay[ymd(due)] = (byDay[ymd(due)] || 0) + (i.estMinutes || 0);
+    });
+    Object.keys(byDay).forEach(function (k) {
+      if (byDay[k] >= 360) {
+        var dd = new Date(k + "T12:00:00");
+        out.push({ sev: "warn", text: DAY_FULL[dd.getDay()] + " carries " + fmtMinutes(byDay[k]) + " of work — start earlier" });
+      }
+    });
+    return out;
+  }
+
+  /** Every catalog entry that carries a researched deadline, soonest first. */
+  function catalogDeadlines() {
+    var out = [];
+    CATALOG.clubs.concat(CATALOG.programs).forEach(function (o) {
+      if (!o.dl) return;
+      var d = new Date(o.dl + "T23:59:00");
+      if (!isNaN(d.getTime())) out.push({ n: o.n, due: d, o: o });
+    });
+    return out.sort(function (a, b) { return a.due - b.due; });
+  }
+  function isTracked(st, o) {
+    return st.items.some(function (i) { return i.ref === o.n; }) ||
+           (st.dismissed || []).indexOf(o.n) !== -1;
+  }
+  function trackOpportunity(o, due) {
+    state.items.push({
+      id: uid(), courseId: null, title: o.n + " — application",
+      kind: "APPLICATION", dueAt: due, estMinutes: 120, weight: 0,
+      status: "NOT_STARTED", ref: o.n, url: o.u || o.s || null
+    });
+    flash = { sev: "good", text: o.n + " is now in your ranked work. Confirm the deadline on their site — it was read on " + CATALOG.verifiedAt + "." };
+    touch(); render();
+  }
+
+  function courseOf(st, id) {
+    for (var i = 0; i < st.courses.length; i++) if (st.courses[i].id === id) return st.courses[i];
+    return null;
+  }
+  function meetingsOn(st, dow) {
+    var out = [];
+    st.courses.forEach(function (c) {
+      (c.meetings || []).forEach(function (m) {
+        if (m.dayOfWeek === dow) out.push({ course: c, m: m });
+      });
+    });
+    return out.sort(function (a, b) { return minutesOf(a.m.startTime) - minutesOf(b.m.startTime); });
+  }
+  function itemsDueOn(st, date) {
+    var key = ymd(date);
+    return st.items.filter(function (i) {
+      var d = parseDue(i.dueAt);
+      return d && ymd(d) === key;
+    });
+  }
+
+  /* ========================= state + persistence ======================== */
+  var STASH = "collegeos:pending";
+  var root = document.getElementById("root");
+  var tab = "now";
+  var dirty = false;
+  var saving = false;
+  var writable = null;   // null = unknown, false = read-only / unavailable
+  var artifactNS = null;
+  var saveTimer = null;
+  var flash = null;
+  var review = null;     // parsed-schedule review buffer
+
+  function blank() { return { v: 1, term: "", courses: [], items: [], updatedAt: null }; }
+
+  var state = (function () {
+    var base;
+    try { base = JSON.parse(document.getElementById("app-state").textContent) || blank(); }
+    catch (e) { base = blank(); }
+    if (!base.courses) base.courses = [];
+    if (!base.items) base.items = [];
+    // A publish reloads the view; if our own edits never landed (a conflict,
+    // or a closed tab), the stash is newer than what was served. Keep it.
+    try {
+      var pend = JSON.parse(sessionStorage.getItem(STASH) || "null");
+      if (pend && pend.updatedAt && (!base.updatedAt || pend.updatedAt > base.updatedAt)) {
+        dirty = true;
+        return pend;
+      }
+      sessionStorage.removeItem(STASH);
+    } catch (e) {}
+    return base;
+  })();
+
+  function touch() {
+    state.updatedAt = new Date().toISOString();
+    dirty = true;
+    try { sessionStorage.setItem(STASH, JSON.stringify(state)); } catch (e) {}
+    scheduleSave();
+  }
+
+  function scheduleSave() {
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () {
+      var a = document.activeElement;
+      var typing = a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.isContentEditable);
+      if (typing) return scheduleSave();     // never yank the page mid-typing
+      save();
+    }, 7000);
+  }
+
+  /* The replacement page is rendered from the page's own canonical source —
+     the authored <style> and <script> blocks — never from the live DOM. */
+  function renderDoc(st) {
+    var css = document.getElementById("app-css").textContent;
+    var js = document.getElementById("app-js").textContent;
+    var json = JSON.stringify(st).replace(/</g, "\\u003c");
+    return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n' +
+      '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' +
+      '<title>College OS</title>\n' +
+      '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">\n' +
+      '<style id="app-css">' + css + '<\/style>\n</head>\n<body>\n<div id="root"><\/div>\n' +
+      '<script id="app-state" type="application/json">' + json + '<\/script>\n' +
+      '<script id="app-js">' + js + '<\/script>\n</body>\n</html>';
+  }
+
+  async function save() {
+    if (saving || !dirty) return;
+    if (writable === false || !window.claude || typeof window.claude.use !== "function") {
+      writable = false; render(); return;
+    }
+    saving = true; render();
+    try {
+      if (!artifactNS) artifactNS = await window.claude.use("artifact");
+      if (!artifactNS) {
+        writable = false; saving = false;
+        flash = { sev: "plain", text: "Saving to the live page is not available here — your changes are kept on this device only." };
+        render(); return;
+      }
+      await artifactNS.publish(renderDoc(state));
+      // Success reloads every open view, this one included.
+    } catch (err) {
+      saving = false;
+      var code = err && err.code;
+      if (code === "conflict") {
+        // Someone published first; the shell is already reloading us to the
+        // winner. The stash carries these edits across that reload.
+        return;
+      }
+      if (code === "not_writer" || code === "not_granted" || code === "not_declared" || code === "consent_required") {
+        writable = false;
+        flash = { sev: "plain", text: "This is a view-only copy — changes stay on this device. Ask for edit access to save them to the live page." };
+      } else if (code === "rate_limited") {
+        flash = { sev: "warn", text: "Saving too fast — waiting a moment. Your changes are safe." };
+        setTimeout(save, 12000);
+      } else if (code === "too_large") {
+        flash = { sev: "crit", text: "This page has grown too large to save. Remove some finished work and try again." };
+      } else {
+        flash = { sev: "warn", text: "Could not save just now — your changes are kept. Tap Save to retry." };
+      }
+      render();
+    }
+  }
+
+  /* ============================== rendering ============================= */
+  function h(tag, attrs, kids) {
+    var e = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      var v = attrs[k];
+      if (v == null || v === false) return;
+      if (k === "html") e.innerHTML = v;
+      else if (k === "text") e.textContent = v;
+      else if (k.slice(0, 2) === "on") e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v === true ? "" : v);
+    });
+    (kids || []).forEach(function (k) {
+      if (k == null || k === false) return;
+      e.appendChild(typeof k === "string" ? document.createTextNode(k) : k);
+    });
+    return e;
+  }
+  function frag(kids) {
+    var f = document.createDocumentFragment();
+    (kids || []).forEach(function (k) { if (k) f.appendChild(k); });
+    return f;
+  }
+  function icon(d) {
+    var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    s.setAttribute("viewBox", "0 0 24 24");
+    s.innerHTML = d;
+    return s;
+  }
+
+  function header() {
+    var now = new Date();
+    var right;
+    if (saving) right = h("span", { class: "saveflag", text: "Saving…" });
+    else if (writable === false) right = h("span", { class: "saveflag", title: "This copy cannot write back to the live page; changes stay in this browser.", text: "On this device" });
+    else if (dirty) right = h("button", { class: "savebtn", onclick: save, text: "Save" });
+    else right = h("span", { class: "saveflag", text: state.updatedAt ? "Saved" : "" });
+
+    return h("div", { class: "top" }, [
+      h("div", { class: "when" }, [
+        h("div", { class: "eyebrow", text: state.term || "College OS" }),
+        h("h1", { text: DAY_FULL[now.getDay()] + ", " + MONTHS[now.getMonth()] + " " + now.getDate() })
+      ]),
+      right
+    ]);
+  }
+
+  function tabbar() {
+    var now = new Date();
+    var due = state.items.filter(function (i) {
+      if (i.status === "DONE" || !i.dueAt) return false;
+      var d = parseDue(i.dueAt); return d && daysUntil(d, now) <= 0;
+    }).length;
+    var closing = catalogDeadlines().filter(function (o) {
+      var d = daysUntil(o.due, now);
+      return d >= 0 && d <= 7 && !isTracked(state, o);
+    }).length;
+    var defs = [
+      ["now", "Now", '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', due],
+      ["week", "Week", '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>', 0],
+      ["work", "Work", '<path d="M4 6h16M4 12h16M4 18h10"/>', 0],
+      ["campus", "Campus", '<path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 10.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5"/>', closing],
+      ["setup", "Classes", '<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/>', 0]
+    ];
+    return h("nav", { class: "tabs" }, defs.map(function (d) {
+      return h("button", {
+        class: "tab", "aria-current": tab === d[0] ? "true" : "false",
+        onclick: function () { tab = d[0]; review = null; flash = null; window.scrollTo(0, 0); render(); }
+      }, [
+        icon(d[2]),
+        d[3] ? h("span", { class: "badge", text: String(d[3]) }) : null,
+        h("span", { text: d[1] })
+      ]);
+    }));
+  }
+
+  /* ------------------------------- NOW -------------------------------- */
+  function viewNow() {
+    var now = new Date();
+    var out = [];
+
+    if (!state.courses.length) return viewWelcome();
+
+    var today = meetingsOn(state, now.getDay());
+    var mins = now.getHours() * 60 + now.getMinutes();
+    var current = null, next = null;
+    today.forEach(function (x) {
+      var s = minutesOf(x.m.startTime), e = minutesOf(x.m.endTime);
+      if (mins >= s && mins < e) current = x;
+      else if (mins < s && !next) next = x;
+    });
+
+    var lede;
+    if (current) {
+      lede = "In " + current.course.code + " right now — until " + fmtClock(current.m.endTime) +
+        (current.m.location ? " in " + current.m.location : "") + ".";
+    } else if (next) {
+      var mAway = minutesOf(next.m.startTime) - mins;
+      lede = next.course.code + " starts in " + fmtMinutes(mAway) + " at " + fmtClock(next.m.startTime) +
+        (next.m.location ? ", " + next.m.location : "") + ".";
+    } else {
+      lede = today.length ? "Classes are done for today." : "No classes scheduled today.";
+    }
+    out.push(h("p", { class: "lede", text: lede, style: "margin-bottom:20px" }));
+
+    var alerts = computeAlerts(state, now);
+    if (alerts.length) {
+      out.push(h("div", { class: "section" }, [
+        h("div", { class: "section-head" }, [h("h2", { text: "Needs attention" }), h("span", { class: "count", text: String(alerts.length) })]),
+        h("div", { class: "stack-sm" }, alerts.slice(0, 5).map(function (a) {
+          return h("div", { class: "note " + a.sev, text: a.text });
+        }))
+      ]));
+    }
+
+    var ranked = rankOpen(state, now).filter(function (r) { return r.score > 0; }).slice(0, 5);
+    out.push(h("div", { class: "section" }, [
+      h("div", { class: "section-head" }, [
+        h("h2", { text: "Do this next" }),
+        h("span", { class: "count", text: ranked.length ? "ranked by what it costs to wait" : "" })
+      ]),
+      ranked.length
+        ? h("div", { class: "stack-sm" }, ranked.map(function (r, i) { return actionRow(r, i + 1); }))
+        : h("div", { class: "card" }, [h("p", { class: "empty", text: "Nothing open. Add coursework under Work and it gets ranked here." })])
+    ]));
+
+    out.push(h("div", { class: "section" }, [
+      h("div", { class: "section-head" }, [h("h2", { text: "Today's classes" })]),
+      h("div", { class: "card" }, today.length ? today.map(function (x) {
+        var isNow = current && current.m === x.m;
+        return h("div", { class: "cls" + (isNow ? " now" : "") }, [
+          h("div", { class: "t", text: fmtClock(x.m.startTime) }),
+          h("div", { class: "grow" }, [
+            h("div", { class: "n" }, [
+              h("span", { class: "dot", style: "background:" + x.course.color + ";margin-right:7px" }),
+              x.course.code + " — " + x.course.title
+            ]),
+            h("div", { class: "r", text: [x.m.kind !== "LECTURE" ? x.m.kind.toLowerCase() : "", x.m.location || ""].filter(Boolean).join(" · ") })
+          ])
+        ]);
+      }) : [h("p", { class: "empty", text: "Nothing on the timetable today." })])
+    ]));
+
+    return frag(out);
+  }
+
+  function actionRow(r, rank) {
+    var it = r.item;
+    var bits = [];
+    if (r.course) bits.push(r.course.code);
+    if (r.due) bits.push(dueLabel(r.due, new Date()));
+    if (it.estMinutes) bits.push(fmtMinutes(it.estMinutes));
+    var sev = r.priority === "CRITICAL" ? "crit" : r.priority === "HIGH" ? "warn" : "";
+    return h("button", {
+      class: "act", "data-p": r.priority,
+      onclick: function () { cycle(it); }
+    }, [
+      h("div", { class: "rank", text: String(rank) }),
+      h("div", { class: "grow" }, [
+        h("div", { class: "row-wrap" }, [
+          h("div", { class: "ttl grow", text: it.title }),
+          h("span", { class: "chip " + sev, text: r.priority })
+        ]),
+        h("div", { class: "why", text: bits.join(" · ") }),
+        h("div", { class: "why", text: r.reason }),
+        it.status === "IN_PROGRESS" ? h("span", { class: "chip gold", text: "in progress", style: "margin-top:6px" }) : null
+      ])
+    ]);
+  }
+
+  function cycle(it) {
+    it.status = it.status === "NOT_STARTED" ? "IN_PROGRESS" : it.status === "IN_PROGRESS" ? "DONE" : "NOT_STARTED";
+    touch(); render();
+  }
+
+  function viewWelcome() {
+    return frag([
+      h("div", { class: "section" }, [
+        h("p", { class: "lede", text: "This is your live College OS. It holds your class schedule and everything you owe, and it tells you what to work on next — by what it costs to wait, not by whichever due date is closest." }),
+        h("div", { class: "card" }, [
+          h("h2", { text: "Start with your real schedule", style: "margin-bottom:8px" }),
+          h("p", { class: "lede", style: "font-size:13.5px;margin-bottom:12px", text: "Open YES, select your class schedule, copy it, and paste it in. Courses, days, times, rooms and instructors all come across at once. Nothing logs into YES — you sign in, you copy, you paste." }),
+          h("div", { class: "row-wrap" }, [
+            h("button", { class: "btn pri", text: "Paste my schedule", onclick: function () { tab = "setup"; render(); } }),
+            h("button", { class: "btn", text: "Show me a sample week", onclick: loadSample })
+          ])
+        ])
+      ])
+    ]);
+  }
+
+  function loadSample() {
+    state.term = "Fall 2026";
+    state.courses = [
+      { id: uid(), code: "CS 2201", title: "Program Design and Data Structures", color: COURSE_COLORS[0], credits: 3, difficulty: 4, professor: "A. Rivera", meetings: [
+        { dayOfWeek: 1, startTime: "11:15", endTime: "12:05", kind: "LECTURE", location: "Featheringill 134" },
+        { dayOfWeek: 3, startTime: "11:15", endTime: "12:05", kind: "LECTURE", location: "Featheringill 134" },
+        { dayOfWeek: 5, startTime: "11:15", endTime: "12:05", kind: "LECTURE", location: "Featheringill 134" }] },
+      { id: uid(), code: "MATH 2300", title: "Multivariable Calculus", color: COURSE_COLORS[1], credits: 4, difficulty: 4, professor: "K. Osei", meetings: [
+        { dayOfWeek: 2, startTime: "09:30", endTime: "10:45", kind: "LECTURE", location: "Stevenson 1206" },
+        { dayOfWeek: 4, startTime: "09:30", endTime: "10:45", kind: "LECTURE", location: "Stevenson 1206" }] }
+    ];
+    var t = new Date();
+    state.items = [
+      { id: uid(), courseId: state.courses[0].id, title: "Project 2 — hash tables", kind: "PROJECT", dueAt: ymd(addDays(t, 6)), estMinutes: 420, weight: 15, status: "NOT_STARTED" },
+      { id: uid(), courseId: state.courses[1].id, title: "Problem set 4", kind: "HOMEWORK", dueAt: ymd(addDays(t, 1)), estMinutes: 75, weight: 4, status: "NOT_STARTED" },
+      { id: uid(), courseId: state.courses[1].id, title: "Midterm 1", kind: "EXAM", dueAt: ymd(addDays(t, 9)), estMinutes: 360, weight: 25, status: "NOT_STARTED" }
+    ];
+    flash = { sev: "plain", text: "Sample week loaded so you can look around. Clear it under Classes when you paste your real schedule." };
+    touch(); tab = "now"; render();
+  }
+
+  /* ------------------------------- WEEK ------------------------------- */
+  function viewWeek() {
+    var now = new Date();
+    var todayDow = now.getDay();
+    var days = [1, 2, 3, 4, 5, 6, 0].filter(function (d) {
+      return d >= 1 && d <= 5 ? true : meetingsOn(state, d).length > 0;
+    });
+    return frag([
+      h("p", { class: "lede", style: "margin-bottom:18px", text: "Your week as it actually runs — classes from your schedule, with everything due that day underneath." }),
+      (function () {
+        var noTimes = state.courses.filter(function (c) { return !(c.meetings || []).length; });
+        if (!noTimes.length) return null;
+        return h("div", { class: "note warn", style: "margin-bottom:14px" }, [
+          document.createTextNode(
+            noTimes.length + " of your " + state.courses.length + " classes have no days or times yet (" +
+            noTimes.slice(0, 4).map(function (c) { return c.code; }).join(", ") +
+            (noTimes.length > 4 ? "…" : "") + "), so they are missing from this week."),
+          h("button", { class: "btn sm", style: "margin-left:10px", text: "Add times",
+            onclick: function () { tab = "setup"; window.scrollTo(0, 0); render(); } })
+        ]);
+      })(),
+      h("div", { class: "stack" }, days.map(function (d) {
+        var ms = meetingsOn(state, d);
+        var offset = (d - todayDow + 7) % 7;
+        var date = addDays(now, offset);
+        var dues = itemsDueOn(state, date).filter(function (i) { return i.status !== "DONE"; });
+        var load = dues.reduce(function (s, i) { return s + (i.estMinutes || 0); }, 0);
+        return h("div", { class: "day" + (d === todayDow ? " today" : "") }, [
+          h("h3", {}, [
+            document.createTextNode(DAY_FULL[d] + (d === todayDow ? " · today" : "")),
+            h("span", { text: load ? fmtMinutes(load) + " due" : "" })
+          ]),
+          ms.length ? frag(ms.map(function (x) {
+            return h("div", { class: "cls" }, [
+              h("div", { class: "t", text: fmtClock(x.m.startTime) }),
+              h("div", { class: "grow" }, [
+                h("div", { class: "n" }, [
+                  h("span", { class: "dot", style: "background:" + x.course.color + ";margin-right:7px" }),
+                  x.course.code
+                ]),
+                h("div", { class: "r", text: ["until " + fmtClock(x.m.endTime), x.m.location || "", x.m.kind !== "LECTURE" ? x.m.kind.toLowerCase() : ""].filter(Boolean).join(" · ") })
+              ])
+            ]);
+          })) : h("p", { class: "empty", text: "No classes." }),
+          dues.length ? h("div", { style: "margin-top:9px;display:flex;flex-direction:column;gap:5px" },
+            dues.map(function (i) {
+              var c = courseOf(state, i.courseId);
+              return h("div", { class: "row", style: "font-size:13px" }, [
+                h("span", { class: "chip " + (i.kind === "EXAM" ? "crit" : "gold"), text: i.kind === "EXAM" ? "exam" : "due" }),
+                h("span", { class: "grow", text: (c ? c.code + " · " : "") + i.title })
+              ]);
+            })) : null
+        ]);
+      }))
+    ]);
+  }
+
+  /* ------------------------------- WORK ------------------------------- */
+  function viewWork() {
+    var now = new Date();
+    var open = rankOpen(state, now);
+    var done = state.items.filter(function (i) { return i.status === "DONE"; });
+    return frag([
+      h("div", { class: "section" }, [
+        h("div", { class: "section-head" }, [h("h2", { text: "Open work" }), h("span", { class: "count", text: String(open.length) })]),
+        open.length
+          ? h("div", { class: "stack-sm" }, open.map(function (r, i) { return workRow(r, i + 1); }))
+          : h("div", { class: "card" }, [h("p", { class: "empty", text: "Nothing open yet." })])
+      ]),
+      h("div", { class: "section" }, [
+        h("div", { class: "section-head" }, [h("h2", { text: "Add work" })]),
+        addWorkForm()
+      ]),
+      done.length ? h("div", { class: "section" }, [
+        h("div", { class: "section-head" }, [h("h2", { text: "Finished" }), h("span", { class: "count", text: String(done.length) })]),
+        h("div", { class: "card stack-sm" }, done.map(function (i) {
+          var c = courseOf(state, i.courseId);
+          return h("div", { class: "row", style: "font-size:13.5px" }, [
+            h("span", { class: "grow", style: "color:var(--muted);text-decoration:line-through", text: (c ? c.code + " · " : "") + i.title }),
+            h("button", { class: "btn sm", text: "Reopen", onclick: function () { i.status = "NOT_STARTED"; touch(); render(); } })
+          ]);
+        }))
+      ]) : null
+    ]);
+  }
+
+  function workRow(r, rank) {
+    var it = r.item, c = r.course;
+    return h("div", { class: "act", "data-p": r.priority, style: "cursor:default" }, [
+      h("div", { class: "rank", text: String(rank) }),
+      h("div", { class: "grow" }, [
+        h("div", { class: "row-wrap" }, [
+          h("div", { class: "ttl grow", text: it.title }),
+          h("span", { class: "chip " + (r.priority === "CRITICAL" ? "crit" : r.priority === "HIGH" ? "warn" : ""), text: r.priority })
+        ]),
+        h("div", { class: "why", text: [c ? c.code : "", r.due ? dueLabel(r.due, new Date()) : "no due date", it.estMinutes ? fmtMinutes(it.estMinutes) : "", it.weight ? it.weight + "% of grade" : ""].filter(Boolean).join(" · ") }),
+        h("div", { class: "why", text: r.reason }),
+        h("div", { class: "row-wrap", style: "margin-top:9px" }, [
+          h("button", { class: "btn sm", text: it.status === "NOT_STARTED" ? "Start" : it.status === "IN_PROGRESS" ? "Mark done" : "Reopen", onclick: function () { cycle(it); } }),
+          h("button", { class: "btn sm", text: it.status === "BLOCKED" ? "Unblock" : "Blocked", onclick: function () { it.status = it.status === "BLOCKED" ? "NOT_STARTED" : "BLOCKED"; touch(); render(); } }),
+          h("button", { class: "btn sm danger", text: "Delete", onclick: function () { state.items = state.items.filter(function (x) { return x !== it; }); touch(); render(); } })
+        ])
+      ])
+    ]);
+  }
+
+  function addWorkForm() {
+    var f = {};
+    var courseSel = h("select", { class: "in" }, [h("option", { value: "", text: "No course" })].concat(
+      state.courses.map(function (c) { return h("option", { value: c.id, text: c.code }); })));
+    var kindSel = h("select", { class: "in" }, ["HOMEWORK", "READING", "PROJECT", "LAB", "PAPER", "EXAM", "QUIZ"].map(function (k) {
+      return h("option", { value: k, text: k[0] + k.slice(1).toLowerCase() });
+    }));
+    f.title = h("input", { class: "in", placeholder: "Problem set 4" });
+    f.due = h("input", { class: "in", type: "date" });
+    f.est = h("input", { class: "in", type: "number", min: "5", step: "5", placeholder: "90" });
+    f.weight = h("input", { class: "in", type: "number", min: "0", max: "100", step: "1", placeholder: "5" });
+
+    return h("div", { class: "card stack-sm" }, [
+      h("div", {}, [h("label", { text: "What is it" }), f.title]),
+      h("div", { class: "f2" }, [
+        h("div", {}, [h("label", { text: "Course" }), courseSel]),
+        h("div", {}, [h("label", { text: "Kind" }), kindSel])
+      ]),
+      h("div", { class: "f3" }, [
+        h("div", {}, [h("label", { text: "Due" }), f.due]),
+        h("div", {}, [h("label", { text: "Minutes" }), f.est]),
+        h("div", {}, [h("label", { text: "% of grade" }), f.weight])
+      ]),
+      h("p", { class: "why", text: "Minutes and grade weight are what let this outrank things that are merely sooner. A rough guess beats leaving them blank." }),
+      h("button", {
+        class: "btn pri", text: "Add",
+        onclick: function () {
+          var t = f.title.value.trim();
+          if (!t) { f.title.focus(); return; }
+          state.items.push({
+            id: uid(), courseId: courseSel.value || null, title: t.slice(0, 140),
+            kind: kindSel.value, dueAt: f.due.value || null,
+            estMinutes: f.est.value ? Math.max(5, +f.est.value) : null,
+            weight: f.weight.value ? Math.min(100, Math.max(0, +f.weight.value)) : 0,
+            status: "NOT_STARTED"
+          });
+          touch(); render();
+        }
+      })
+    ]);
+  }
+
+  /* ------------------------------ CLASSES ----------------------------- */
+  function viewSetup() {
+    var out = [];
+    var termIn = h("input", { class: "in", value: state.term || "", placeholder: "Fall 2026",
+      onchange: function (e) { state.term = e.target.value.trim().slice(0, 40); touch(); render(); } });
+
+    if (review) return viewReview();
+
+    var paste = h("textarea", { class: "in", placeholder:
+      "Open YES → your class schedule → select the table → copy → paste here.\n\nCS 2201-02\tProgram Design\tMWF\t11:15AM - 12:05PM\tFeatheringill 134\tA. Rivera\t3.00" });
+
+    out.push(h("div", { class: "section" }, [
+      h("div", { class: "section-head" }, [h("h2", { text: "Paste your schedule from YES" })]),
+      h("div", { class: "card stack-sm" }, [
+        h("p", { class: "why", text: "You sign into YES, you copy, you paste. Nothing here logs in or touches your credentials. You review every row before it is saved." }),
+        paste,
+        h("div", { class: "row-wrap" }, [
+          h("button", {
+            class: "btn pri", text: "Read schedule",
+            onclick: function () {
+              var res = parseScheduleText(paste.value);
+              if (!res.courses.length) {
+                flash = { sev: "warn", text: (res.warnings[0] || "Nothing recognizable in that paste.") };
+                render(); return;
+              }
+              review = { res: res, keep: res.courses.map(function () { return true; }), replace: true };
+              flash = null; window.scrollTo(0, 0); render();
+            }
+          })
+        ])
+      ])
+    ]));
+
+    out.push(h("div", { class: "section" }, [
+      h("div", { class: "section-head" }, [h("h2", { text: "Term" })]),
+      h("div", { class: "card" }, [termIn])
+    ]));
+
+    out.push(h("div", { class: "section" }, [
+      h("div", { class: "section-head" }, [h("h2", { text: "Your classes" }), h("span", { class: "count", text: String(state.courses.length) })]),
+      state.courses.length ? h("div", { class: "stack-sm" }, state.courses.map(courseCard))
+        : h("div", { class: "card" }, [h("p", { class: "empty", text: "No classes yet — paste your schedule above." })])
+    ]));
+
+    if (state.courses.length) {
+      out.push(h("button", {
+        class: "btn danger", text: "Clear all classes and work",
+        onclick: function () {
+          if (!window.confirm("Delete every class and everything due? This cannot be undone.")) return;
+          state.courses = []; state.items = []; touch(); render();
+        }
+      }));
+    }
+    return frag(out);
+  }
+
+  function courseCard(c) {
+    var ms = c.meetings || [];
+    var kids = [
+      h("div", { class: "row-wrap" }, [
+        h("span", { class: "dot", style: "background:" + c.color }),
+        h("strong", { class: "grow", text: c.code + " — " + c.title }),
+        h("button", { class: "btn sm danger", text: "Remove", onclick: function () {
+          if (!window.confirm("Remove " + c.code + " and anything filed under it?")) return;
+          state.courses = state.courses.filter(function (x) { return x !== c; });
+          state.items = state.items.filter(function (i) { return i.courseId !== c.id; });
+          touch(); render();
+        } })
+      ]),
+      h("div", { class: "why", style: "margin-top:5px", text: [
+        c.professor || "", c.credits ? c.credits + " credits" : ""
+      ].filter(Boolean).join(" · ") })
+    ];
+
+    // A course with no meetings is invisible on Week and Now — say so here,
+    // where it can be fixed, rather than letting the week look empty.
+    if (!ms.length) {
+      kids.push(h("p", { class: "note warn", style: "margin-top:8px",
+        text: "No days or times yet, so this class never appears on your week. Add its meetings below." }));
+    }
+
+    kids.push(h("div", { class: "stack-sm", style: "margin-top:9px" }, ms.map(function (m, mi) {
+      return h("div", { class: "row-wrap", style: "gap:6px" }, [
+        h("select", { class: "in", style: "width:auto;padding:6px 8px;font-size:13px",
+          onchange: function (e) { m.dayOfWeek = +e.target.value; touch(); render(); }
+        }, DAY_ABBR.map(function (d, di) {
+          return h("option", { value: di, selected: m.dayOfWeek === di, text: d });
+        })),
+        h("input", { class: "in", type: "time", style: "width:auto;padding:6px 8px;font-size:13px", value: m.startTime,
+          onchange: function (e) { if (e.target.value) { m.startTime = e.target.value; touch(); } } }),
+        h("input", { class: "in", type: "time", style: "width:auto;padding:6px 8px;font-size:13px", value: m.endTime,
+          onchange: function (e) { if (e.target.value) { m.endTime = e.target.value; touch(); } } }),
+        h("select", { class: "in", style: "width:auto;padding:6px 8px;font-size:13px",
+          onchange: function (e) { m.kind = e.target.value; touch(); }
+        }, ["LECTURE", "LAB", "DISCUSSION", "SEMINAR"].map(function (k) {
+          return h("option", { value: k, selected: (m.kind || "LECTURE") === k, text: k[0] + k.slice(1).toLowerCase() });
+        })),
+        h("input", { class: "in", style: "flex:1;min-width:110px;padding:6px 8px;font-size:13px",
+          placeholder: "Room", value: m.location || "",
+          onchange: function (e) { m.location = e.target.value.trim() || null; touch(); } }),
+        h("button", { class: "btn sm", text: "×", title: "Remove this meeting", onclick: function () {
+          c.meetings.splice(mi, 1); touch(); render();
+        } })
+      ]);
+    })));
+
+    kids.push(h("div", { class: "row-wrap", style: "margin-top:9px" }, [
+      h("button", { class: "btn sm" + (ms.length ? "" : " pri"), text: "+ Add a meeting", onclick: function () {
+        c.meetings = (c.meetings || []).concat([
+          { dayOfWeek: 1, startTime: "09:00", endTime: "09:50", kind: "LECTURE", location: null }
+        ]);
+        touch(); render();
+      } }),
+      ms.length > 0 ? h("button", { class: "btn sm", title: "Copy this meeting's time onto other days",
+        text: "Repeat on MWF", onclick: function () {
+          var base = c.meetings[0];
+          [1, 3, 5].forEach(function (d) {
+            if (!c.meetings.some(function (m) { return m.dayOfWeek === d && m.startTime === base.startTime; })) {
+              c.meetings.push({ dayOfWeek: d, startTime: base.startTime, endTime: base.endTime, kind: base.kind, location: base.location });
+            }
+          });
+          c.meetings.sort(function (a, b) { return a.dayOfWeek - b.dayOfWeek || a.startTime.localeCompare(b.startTime); });
+          touch(); render();
+        } }) : null,
+      ms.length > 0 ? h("button", { class: "btn sm", text: "Repeat on TR", onclick: function () {
+          var base = c.meetings[0];
+          [2, 4].forEach(function (d) {
+            if (!c.meetings.some(function (m) { return m.dayOfWeek === d && m.startTime === base.startTime; })) {
+              c.meetings.push({ dayOfWeek: d, startTime: base.startTime, endTime: base.endTime, kind: base.kind, location: base.location });
+            }
+          });
+          c.meetings.sort(function (a, b) { return a.dayOfWeek - b.dayOfWeek || a.startTime.localeCompare(b.startTime); });
+          touch(); render();
+        } }) : null
+    ]));
+
+    kids.push(h("div", { class: "row-wrap", style: "margin-top:9px" }, [
+      h("label", { style: "margin:0;font-size:12px", text: "How hard is it?" }),
+      h("select", { class: "in", style: "width:auto;padding:5px 8px;font-size:13px",
+        onchange: function (e) { c.difficulty = +e.target.value; touch(); }
+      }, [1, 2, 3, 4, 5].map(function (n) {
+        return h("option", { value: n, selected: (c.difficulty || 3) === n, text: ["easy", "light", "normal", "hard", "brutal"][n - 1] });
+      })),
+      h("label", { style: "margin:0 0 0 8px;font-size:12px", text: "Credits" }),
+      h("input", { class: "in", type: "number", min: "0", max: "12", step: "0.5",
+        style: "width:70px;padding:5px 8px;font-size:13px", value: c.credits || "",
+        onchange: function (e) { c.credits = e.target.value ? +e.target.value : null; touch(); } })
+    ]));
+
+    return h("div", { class: "card" }, kids);
+  }
+
+  function viewReview() {
+    var res = review.res;
+    var existing = {};
+    state.courses.forEach(function (c) { existing[c.code.replace(/\s+/g, "").toUpperCase()] = c; });
+
+    return frag([
+      h("div", { class: "section" }, [
+        h("div", { class: "section-head" }, [
+          h("h2", { text: "Check this before it's saved" }),
+          h("span", { class: "count", text: res.courses.length + " found" })
+        ]),
+        res.term ? h("p", { class: "why", text: "Term read as " + res.term + "." }) : null
+      ]),
+      res.warnings.length ? h("div", { class: "stack-sm", style: "margin-bottom:16px" },
+        res.warnings.map(function (w) { return h("div", { class: "note warn", text: w }); })) : null,
+      h("div", { class: "stack-sm" }, res.courses.map(function (c, i) {
+        var match = existing[c.code.replace(/\s+/g, "").toUpperCase()];
+        return h("div", { class: "rev" + (review.keep[i] ? "" : " off") }, [
+          h("div", { class: "row-wrap" }, [
+            h("input", { type: "checkbox", checked: review.keep[i], onchange: function (e) { review.keep[i] = e.target.checked; render(); } }),
+            h("strong", { class: "grow", text: c.code + " — " + c.title }),
+            h("span", { class: "chip " + (c.confidence === "VERIFIED" ? "good" : c.confidence === "LIKELY" ? "warn" : ""),
+              text: c.confidence === "VERIFIED" ? "read cleanly" : c.confidence === "LIKELY" ? "check this" : "needs input" })
+          ]),
+          h("div", { class: "why", style: "margin-top:5px", text: [
+            c.professor || "", c.credits ? c.credits + " credits" : "", c.section ? "section " + c.section : ""
+          ].filter(Boolean).join(" · ") }),
+          h("div", { style: "margin-top:7px" }, c.meetings.map(function (m) {
+            return h("div", { class: "row", style: "font-size:12.5px" }, [
+              h("span", { class: "mono", style: "min-width:34px", text: DAY_ABBR[m.dayOfWeek] }),
+              h("span", { class: "mono", text: fmtClock(m.startTime) + "–" + fmtClock(m.endTime) }),
+              h("span", { class: "grow", text: m.location || "" }),
+              m.inferredMeridiem ? h("span", { class: "chip warn", text: "am/pm guessed" }) : null
+            ]);
+          })),
+          c.warnings.length ? h("div", { style: "margin-top:7px" }, c.warnings.map(function (w) {
+            return h("p", { class: "why", style: "color:var(--warn)", text: w });
+          })) : null,
+          match ? h("p", { class: "why", style: "margin-top:6px", text: "Already on file — its meeting times will be replaced by these." }) : null,
+          h("details", { style: "margin-top:6px" }, [
+            h("summary", { class: "why", style: "cursor:pointer", text: "Show the lines this came from" }),
+            h("div", { class: "src", text: c.sourceLines.join("\n") })
+          ])
+        ]);
+      })),
+      h("div", { class: "row-wrap", style: "margin-top:18px" }, [
+        h("button", { class: "btn pri", text: "Save these classes", onclick: commitReview }),
+        h("button", { class: "btn", text: "Cancel", onclick: function () { review = null; render(); } })
+      ])
+    ]);
+  }
+
+  function commitReview() {
+    var res = review.res;
+    var added = 0, replaced = 0;
+    if (res.term && !state.term) state.term = res.term;
+    res.courses.forEach(function (pc, i) {
+      if (!review.keep[i]) return;
+      var key = pc.code.replace(/\s+/g, "").toUpperCase();
+      var found = null;
+      state.courses.forEach(function (c) { if (c.code.replace(/\s+/g, "").toUpperCase() === key) found = c; });
+      var meetings = pc.meetings.map(function (m) {
+        return { dayOfWeek: m.dayOfWeek, startTime: m.startTime, endTime: m.endTime, kind: m.kind, location: m.location };
+      });
+      if (found) {
+        // The registrar decides when a class meets; a stale meeting is worse
+        // than none, so meetings are replaced outright.
+        found.meetings = meetings;
+        if (!found.professor && pc.professor) found.professor = pc.professor;
+        replaced++;
+      } else {
+        state.courses.push({
+          id: uid(), code: pc.code, title: pc.title, color: nextColor(state.courses.map(function (c) { return c.color; })),
+          credits: pc.credits || 3, difficulty: 3, professor: pc.professor || null, meetings: meetings
+        });
+        added++;
+      }
+    });
+    review = null;
+    flash = { sev: "good", text: added + " class" + (added === 1 ? "" : "es") + " added" +
+      (replaced ? ", " + replaced + " updated" : "") + ". Check the times before you trust them." };
+    touch(); tab = "week"; window.scrollTo(0, 0); render();
+  }
+
+  /* ------------------------------ CAMPUS ------------------------------ */
+  var campusKind = "clubs";
+  var campusQ = "";
+
+  function viewCampus() {
+    var now = new Date();
+    var out = [];
+
+    var deadlines = catalogDeadlines().filter(function (o) { return daysUntil(o.due, now) >= 0; });
+    if (deadlines.length) {
+      out.push(h("div", { class: "section" }, [
+        h("div", { class: "section-head" }, [
+          h("h2", { text: "Closing soon" }),
+          h("span", { class: "count", text: "researched " + CATALOG.verifiedAt })
+        ]),
+        h("div", { class: "stack-sm" }, deadlines.map(function (d) {
+          var days = daysUntil(d.due, now);
+          var tracked = state.items.some(function (i) { return i.ref === d.n; });
+          var dismissed = (state.dismissed || []).indexOf(d.n) !== -1;
+          return h("div", { class: "act", "data-p": days <= 3 ? "CRITICAL" : days <= 7 ? "HIGH" : "MEDIUM", style: "cursor:default" }, [
+            h("div", { class: "grow" }, [
+              h("div", { class: "row-wrap" }, [
+                h("div", { class: "ttl grow", text: d.n }),
+                h("span", { class: "chip " + (days <= 3 ? "crit" : "warn"),
+                  text: days === 0 ? "closes today" : days === 1 ? "tomorrow" : days + " days" })
+              ]),
+              h("div", { class: "why", text: "Closes " + MONTHS[d.due.getMonth()] + " " + d.due.getDate() + ". " + (d.o.a || "") }),
+              h("div", { class: "row-wrap", style: "margin-top:9px" }, [
+                tracked
+                  ? h("span", { class: "chip good", text: "tracking" })
+                  : dismissed
+                    ? h("button", { class: "btn sm", text: "Track after all", onclick: function () {
+                        state.dismissed = (state.dismissed || []).filter(function (x) { return x !== d.n; });
+                        trackOpportunity(d.o, d.o.dl);
+                      } })
+                    : h("button", { class: "btn sm pri", text: "Track this", onclick: function () { trackOpportunity(d.o, d.o.dl); } }),
+                !tracked && !dismissed ? h("button", { class: "btn sm", text: "Not for me", onclick: function () {
+                  state.dismissed = (state.dismissed || []).concat([d.n]); touch(); render();
+                } }) : null,
+                d.o.s ? h("a", { class: "btn sm", href: d.o.s, target: "_blank", rel: "noreferrer", text: "Verify on their site" }) : null
+              ])
+            ])
+          ]);
+        }))
+      ]));
+    }
+
+    var tabs = [["clubs", "Clubs", CATALOG.clubs.length], ["programs", "Wond'ry", CATALOG.programs.length], ["labs", "Labs", CATALOG.labs.length]];
+    out.push(h("div", { class: "row-wrap", style: "margin-bottom:12px" }, tabs.map(function (t) {
+      return h("button", {
+        class: "btn sm" + (campusKind === t[0] ? " pri" : ""),
+        text: t[1] + " " + t[2],
+        onclick: function () { campusKind = t[0]; render(); }
+      });
+    })));
+
+    var search = h("input", { class: "in", placeholder: "Filter — finance, AI, consulting, neuro…", value: campusQ,
+      oninput: function (e) { campusQ = e.target.value; renderCampusList(listHost); } });
+    out.push(h("div", { style: "margin-bottom:12px" }, [search]));
+
+    var listHost = h("div", { class: "stack-sm" });
+    renderCampusList(listHost);
+    out.push(listHost);
+
+    out.push(h("p", { class: "why", style: "margin-top:18px", text:
+      "Gathered from official Vanderbilt sources on " + CATALOG.verifiedAt +
+      ". Each entry says how well it was confirmed — read cleanly means the official page itself was read; " +
+      "check this means it came from a search snippet. Confirm any deadline on the source before you rely on it." }));
+    return frag(out);
+  }
+
+  function renderCampusList(host) {
+    host.textContent = "";
+    var q = campusQ.trim().toLowerCase();
+    var rows = CATALOG[campusKind].filter(function (o) {
+      if (!q) return true;
+      return ((o.n || "") + " " + (o.c || "") + " " + (o.d || "") + " " + (o.p || "") + " " + (o.dept || ""))
+        .toLowerCase().indexOf(q) !== -1;
+    });
+    if (!rows.length) {
+      host.appendChild(h("div", { class: "card" }, [h("p", { class: "empty", text: "Nothing matches “" + campusQ + "”." })]));
+      return;
+    }
+    rows.forEach(function (o) {
+      var tracked = state.items.some(function (i) { return i.ref === o.n; });
+      host.appendChild(h("div", { class: "card" }, [
+        h("strong", { style: "display:block;line-height:1.3", text: o.n }),
+        h("div", { class: "row-wrap", style: "margin-top:6px" }, [
+          h("span", { class: "chip", text: String(o.c || "").replace(/_/g, " ").toLowerCase() }),
+          h("span", { class: "chip " + (o.cf === "VERIFIED" ? "good" : o.cf === "LIKELY" ? "warn" : ""),
+            text: o.cf === "VERIFIED" ? "read cleanly" : o.cf === "LIKELY" ? "check this" : "unconfirmed" }),
+          o.ug ? h("span", { class: "chip good", text: "takes undergrads" }) : null
+        ]),
+        o.p ? h("div", { class: "why", style: "margin-top:4px", text: o.p + (o.dept ? " · " + o.dept : "") }) : null,
+        h("p", { class: "why", style: "margin-top:5px", text: o.d || "" }),
+        o.a ? h("p", { class: "why", style: "margin-top:6px", text: (campusKind === "labs" ? "Next step: " : "How to get in: ") + o.a }) : null,
+        h("div", { class: "row-wrap", style: "margin-top:9px" }, [
+          o.u ? h("a", { class: "btn sm", href: o.u, target: "_blank", rel: "noreferrer", text: "Open" }) : null,
+          o.e ? h("a", { class: "btn sm", href: "mailto:" + o.e, text: "Email" }) : null,
+          o.dl && !tracked ? h("button", { class: "btn sm pri", text: "Track deadline", onclick: function () { trackOpportunity(o, o.dl); } }) : null,
+          tracked ? h("span", { class: "chip good", text: "tracking" }) : null
+        ])
+      ]));
+    });
+  }
+
+  /* ============================== main render ========================== */
+  function render() {
+    root.textContent = "";
+    root.appendChild(header());
+    if (flash) {
+      root.appendChild(h("div", { class: "note " + flash.sev, style: "margin-bottom:16px" }, [
+        document.createTextNode(flash.text),
+        h("button", { class: "btn sm", style: "margin-left:10px", text: "OK", onclick: function () { flash = null; render(); } })
+      ]));
+    }
+    root.appendChild(
+      tab === "now" ? viewNow() :
+      tab === "week" ? viewWeek() :
+      tab === "work" ? viewWork() :
+      tab === "campus" ? viewCampus() : viewSetup()
+    );
+    root.appendChild(h("hr", { class: "sep" }));
+    root.appendChild(h("p", { class: "why", style: "text-align:center;padding-bottom:10px", text:
+      "College OS · your data lives in this page. It never logs into YES, Brightspace, or any account." }));
+    var oldNav = document.querySelector("nav.tabs");
+    if (oldNav) oldNav.remove();
+    document.body.appendChild(tabbar());
+  }
+
+  // Light up saving once the viewer answers; the page works without it.
+  // Outside a viewer — a saved copy, another host — there is no claude at
+  // all, so settle that immediately rather than offering a Save button that
+  // could only fail.
+  if (!window.claude || typeof window.claude.use !== "function") {
+    writable = false;
+  } else {
+    window.claude.use("artifact").then(function (ns) {
+      artifactNS = ns;
+      if (!ns) writable = false;
+      render();
+    }).catch(function () { writable = false; render(); });
+  }
+
+  window.addEventListener("beforeunload", function (e) {
+    if (dirty && !saving) { e.preventDefault(); e.returnValue = ""; }
+  });
+
+  render();
+})();
+</script>

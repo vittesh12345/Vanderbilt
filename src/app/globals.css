@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  /* Surfaces & ink */
+  --surface-0: #f7f6f3;
+  --surface-1: #fcfcfb;
+  --border: #e7e5e0;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #8a8985;
+  /* Vanderbilt accent */
+  --gold: #cfae70;
+  --gold-deep: #9c7c3c;
+  --black: #1c1b18;
+  /* Status (reserved — never used as series colors) */
+  --status-good: #008300;
+  --status-warning: #c98500;
+  --status-serious: #d95926;
+  --status-critical: #cc2936;
+  /* Categorical course slots — validated fixed order, assigned at course
+     creation, never cycled (dataviz reference palette, light mode). */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #4a3aa7;
+  --series-8: #e34948;
+  /* Ordinal workload ramp (blue, steps 250→650) — LIGHT..EXTREME.
+     Always paired with a text label; never color alone. */
+  --load-1: #86b6ef;
+  --load-2: #5598e7;
+  --load-3: #2a78d6;
+  --load-4: #1c5cab;
+  --load-5: #104281;
+}
+
+body {
+  background: var(--surface-0);
+  color: var(--text-primary);
+}
+
+/* Recessive scrollbars for panel lists */
+.thin-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
